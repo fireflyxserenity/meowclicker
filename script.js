@@ -532,7 +532,7 @@ function updateStats() {
 let clickBuffer = 0;
 let lastUpdateTime = 0;
 
-catBtn.addEventListener('click', () => {
+function handleCatClick() {
     // Increment click buffer immediately for responsiveness
     clickBuffer++;
     state.totalClicks++;
@@ -550,7 +550,24 @@ catBtn.addEventListener('click', () => {
     
     // Always animate the cat for immediate feedback
     catBtn.classList.add('clicked');
-    setTimeout(() => catBtn.classList.remove('clicked'), 100);
+    setTimeout(() => catBtn.classList.remove('clicked'), 150);
+}
+
+// Add both click and touch event handlers for better mobile support
+catBtn.addEventListener('click', handleCatClick);
+catBtn.addEventListener('touchend', (e) => {
+    e.preventDefault(); // Prevent double-tap zoom and click event
+    handleCatClick();
+});
+
+// Prevent context menu on long press (mobile)
+catBtn.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+});
+
+// Prevent double-tap zoom on the cat button
+catBtn.addEventListener('touchstart', (e) => {
+    e.preventDefault();
 });
 
 // Fallback update to ensure any remaining clicks are processed
