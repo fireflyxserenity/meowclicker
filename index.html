@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Meow Clicker</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
@@ -39,7 +39,7 @@
             <div class="cat-clicker">
                 <button id="catButton" class="cat-btn">
                     <img id="mainCatImg" src="cat.png" alt="Cat" class="cat-img">
-                    <div id="catFallback" style="display:none;align-items:center;justify-content:center;width:180px;height:180px;border-radius:50%;background:#222;color:#fff;font-size:2rem;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);">🐾 Cat</div>
+                    <div id="catFallback">🐾 Cat</div>
                 </button>
                 <div class="achievements">
                     <h3 class="achievements-header">Achievements</h3>
@@ -79,7 +79,7 @@
             <h2>Edit Profile</h2>
             <label for="profileName">Name:</label>
             <input type="text" id="profileName" maxlength="16">
-            <h3>Choose your cat pic:</h3>
+            <h3>Choose your cat:</h3>
             <div class="cat-photos">
                 <img src="cat.png" class="cat-photo" data-cat="cat.png">
                 <img src="cat1.png" class="cat-photo" data-cat="cat1.png">
