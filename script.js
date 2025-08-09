@@ -393,15 +393,19 @@ function renderUpgrades() {
 upgradeBtns.forEach((btn, i) => {
     if (!btn) return;
     btn.dataset.upgradeIndex = String(i);
-    btn.addEventListener('click', (e) => {
+    
+    function handleUpgradeClick(e) {
         // Evaluate disabled state at click time using aria-disabled/class
         if (btn.classList.contains('is-disabled') || btn.getAttribute('aria-disabled') === 'true') return;
         e.preventDefault();
-    // Ensure most recent clicks are counted before affordability check
-    flushClickBuffer();
-    const idx = Number(btn.dataset.upgradeIndex || i);
+        e.stopPropagation();
+        
+        // Ensure most recent clicks are counted before affordability check
+        flushClickBuffer();
+        const idx = Number(btn.dataset.upgradeIndex || i);
         const upg = upgrades[idx];
         const cost = Math.floor(upg.baseCost * Math.pow(1.15, state.upgrades[idx]));
+        
         // Match the UI: allow purchase when displayed (floored) meows meet cost
         if (Math.floor(state.meowCount) >= cost) {
             btn.classList.add('clicked');
@@ -415,6 +419,21 @@ upgradeBtns.forEach((btn, i) => {
                 btn.classList.remove('clicked');
             }, 50);
         }
+    }
+    
+    // Add both click and mousedown events for better reliability
+    btn.addEventListener('click', handleUpgradeClick);
+    btn.addEventListener('mousedown', handleUpgradeClick);
+    
+    // Prevent context menu on right click
+    btn.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+    });
+    
+    // Add touch events for devices that support both mouse and touch
+    btn.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        handleUpgradeClick(e);
     });
 });
 
