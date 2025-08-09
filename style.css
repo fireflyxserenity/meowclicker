@@ -1,0 +1,599 @@
+/* Prevent hover effect on disabled upgrade buttons */
+.upgrade-btn:disabled,
+.upgrade-btn[disabled],
+.upgrade-btn.is-disabled {
+    background: #444 !important;
+    color: #aaa !important;
+    border: 2.5px solid #555 !important;
+    box-shadow: none !important;
+    cursor: not-allowed !important;
+    filter: grayscale(0.5) brightness(0.8) !important;
+}
+.upgrade-btn:disabled:hover,
+.upgrade-btn[disabled]:hover,
+.upgrade-btn:disabled:focus,
+.upgrade-btn[disabled]:focus,
+.upgrade-btn.is-disabled:hover,
+.upgrade-btn.is-disabled:focus {
+    background: #444 !important;
+    color: #aaa !important;
+    border: 2.5px solid #555 !important;
+    box-shadow: none !important;
+    cursor: not-allowed !important;
+    filter: grayscale(0.5) brightness(0.8) !important;
+}
+.upgrade-available {
+    border: 2.5px solid #00fff7 !important;
+    background: linear-gradient(135deg, #003d3a 0%, #3d0040 100%) !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 24px #00fff7, 0 0 32px #ff6fff !important;
+    filter: brightness(1.15);
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+}
+
+body {
+    background: linear-gradient(135deg, #181c2b 0%, #1a0036 100%);
+    font-family: 'Quicksand', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    min-height: 100vh;
+}
+
+/* Header */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2.5rem 1rem 2.5rem;
+    background: rgba(24, 28, 43, 0.95);
+    box-shadow: 0 2px 24px #00fff7, 0 1px 8px #ff6fff;
+    border-bottom: 3px solid #00fff7;
+}
+.title {
+    color: #fff;
+    font-size: 2.3rem;
+    font-family: 'Quicksand', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-weight: 700;
+    letter-spacing: 3.4px;
+    text-shadow: 0 0 12px #00fff7, 0 0 24px #ff6fff;
+    margin: 0;
+    text-transform: uppercase;
+}
+.header-btn {
+    background: linear-gradient(135deg, #ff6fff 0%, #00fff7 100%);
+    color: #fff;
+    border: none;
+    border-radius: 17px;
+    padding: 0.51rem 1.11rem;
+    font-size: 0.94rem;
+    font-weight: bold;
+    margin-left: 0.85rem;
+    box-shadow: 0 0 8px #ff6fff, 0 0 16px #00fff7;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+}
+.header-btn:active {
+    background: linear-gradient(135deg, #00fff7 0%, #ff6fff 100%);
+    transform: scale(1.05);
+}
+
+/* Main Cat Button */
+.cat-btn {
+    background: linear-gradient(135deg, #181c2b 60%, #1a0036 100%);
+    border: 6px solid #00fff7;
+    border-radius: 50%;
+    width: 280px;
+    height: 280px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 2rem auto 1.5rem auto;
+    box-shadow: 0 0 32px #00fff7, 0 0 64px #ff6fff;
+    cursor: pointer;
+    transition: box-shadow 0.2s, transform 0.1s;
+    position: relative;
+    overflow: hidden;
+}
+.cat-btn:active {
+    box-shadow: 0 0 64px 24px #ff6fff, 0 0 128px 32px #00fff7;
+    transform: scale(1.05);
+}
+
+/* Gold legend glow when 'Upgrade Legend' is activated */
+/* Silver glow for 'Upgrade Legend' */
+.cat-btn.legend-glow {
+    border-color: #C0C0C0; /* silver */
+    box-shadow: 0 0 32px #C0C0C0, 0 0 64px #A9A9A9; /* silver + dark gray */
+}
+.cat-btn.legend-glow:active {
+    box-shadow: 0 0 64px 24px #C0C0C0, 0 0 128px 32px #A9A9A9;
+}
+
+/* Gold glow for 'Meow Millionaire' */
+.cat-btn.millionaire-glow {
+    border-color: #FFD700; /* gold */
+    box-shadow: 0 0 32px #FFD700, 0 0 64px #FFA500; /* gold + orange */
+}
+.cat-btn.millionaire-glow:active {
+    box-shadow: 0 0 64px 24px #FFD700, 0 0 128px 32px #FFA500;
+}
+
+/* Upgrade Button Text Fix */
+
+.stats {
+    display: flex;
+    justify-content: center;
+    gap: 2.13rem;
+    margin-bottom: 1.28rem;
+    font-size: 1.02rem;
+    color: #fff;
+    text-shadow: 0 0 6px #00fff7, 0 0 12px #ff6fff;
+    background: rgba(0,255,255,0.08);
+    border-radius: 14px;
+    padding: 0.6rem 0;
+    margin-top: 1.02rem;
+    max-width: 595px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.stat {
+    background: rgba(24, 28, 43, 0.7);
+    border-radius: 14px;
+    padding: 0.6rem 1.02rem;
+    box-shadow: 0 0 8px #00fff7, 0 0 16px #ff6fff;
+    font-size: 0.94rem;
+    min-width: 94px;
+    text-align: center;
+    font-family: 'Quicksand', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.main-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 2.5rem;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 1rem;
+}
+
+.game-layout {
+    display: flex;
+    flex-direction: row;
+    gap: 3rem;
+    width: 100%;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+.cat-clicker {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.achievements {
+    margin-top: 1.3rem;
+    text-align: center;
+    width: 100%;
+    max-width: 500px;
+}
+
+.achievements-header {
+    color: #ffffff;
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-bottom: 0.85rem;
+    text-shadow: 0 0 8px #ffd700;
+}
+
+.achievement-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.achievement-btn {
+    background: linear-gradient(135deg, #555 0%, #333 100%);
+    color: #999;
+    border: 2px solid #555;
+    border-radius: 10px;
+    padding: 0.6rem 0.8rem;
+    font-size: 0.7rem;
+    font-weight: bold;
+    cursor: not-allowed;
+    transition: all 0.2s;
+    min-height: 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    line-height: 1.2;
+    opacity: 0.6;
+}
+
+.achievement-btn.unlocked {
+    background: linear-gradient(135deg, #ffd700 0%, #ffb347 100%);
+    color: #2c1810;
+    border-color: #ffd700;
+    box-shadow: 0 0 12px #ffd700, 0 0 20px #ffb347;
+    cursor: pointer;
+    opacity: 1;
+}
+
+.achievement-btn.unlocked:hover {
+    background: linear-gradient(135deg, #ffed4e 0%, #ffc947 100%);
+    transform: scale(1.02);
+    box-shadow: 0 0 16px #ffd700, 0 0 24px #ffb347;
+}
+
+.achievement-btn.activated {
+    background: linear-gradient(135deg, #90EE90 0%, #32CD32 100%);
+    color: #0f4f0f;
+    border-color: #32CD32;
+    box-shadow: 0 0 12px #32CD32, 0 0 20px #90EE90;
+    cursor: default;
+    opacity: 1;
+}
+
+.achievement-btn.activated .achievement-reward {
+    color: #0f4f0f !important;
+}
+
+.achievement-btn.activated:hover {
+    transform: none;
+    background: linear-gradient(135deg, #90EE90 0%, #32CD32 100%);
+}
+
+.achievement-title {
+    font-size: 0.75rem;
+    font-weight: bold;
+    margin-bottom: 0.2rem;
+}
+
+.achievement-desc {
+    font-size: 0.6rem;
+    opacity: 0.8;
+    margin-bottom: 0.2rem;
+}
+
+.achievement-reward {
+    font-size: 0.6rem;
+    font-weight: bold;
+    color: #90EE90;
+}
+
+.upgrades {
+    flex: 1;
+    max-width: 600px;
+    min-width: 300px;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .game-layout {
+        flex-direction: column;
+        gap: 2rem;
+        align-items: center;
+    }
+    .stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.6rem 0.6rem;
+        max-width: 360px;
+    }
+    .stat { min-width: auto; }
+    
+    .cat-clicker {
+        width: 100%;
+    }
+    
+    .upgrades {
+        width: 100%;
+        max-width: none;
+    }
+    
+    .cat-btn {
+        width: 200px;
+        height: 200px;
+    }
+    
+    .cat-img {
+        width: 170px;
+        height: 170px;
+    }
+    
+    .upgrade-list {
+        gap: 0.6rem;
+    }
+}
+
+.header-btn {
+    background: linear-gradient(135deg, #ff6fff 0%, #00fff7 100%);
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    padding: 0.6rem 1.3rem;
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-left: 1rem;
+    box-shadow: 0 0 8px #ff6fff, 0 0 16px #00fff7;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    font-family: 'Quicksand', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.header-btn:active {
+    background: linear-gradient(135deg, #00fff7 0%, #ff6fff 100%);
+    transform: scale(1.05);
+}
+.cat-btn:active {
+    box-shadow: 0 0 64px 24px #ff6fff, 0 0 128px 32px #00fff7;
+    transform: scale(1.05);
+}
+.cat-img {
+    width: 250px;
+    height: 250px;
+    object-fit: cover;
+    border-radius: 50%;
+    filter: drop-shadow(0 0 18px #00fff7) drop-shadow(0 0 32px #ff6fff);
+    transition: transform 0.1s;
+    background: #181c2b;
+    display: block;
+    margin: 0 auto;
+    box-shadow: 0 0 24px #00fff7, 0 0 32px #ff6fff;
+}
+
+.upgrade-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.34rem;
+    justify-content: center;
+    align-items: center;
+    margin-top: 0.85rem;
+    width: 100%;
+}
+
+.upgrade-btn {
+    background: linear-gradient(135deg, #0f1219 60%, #0d001a 100%);
+    color: #fff;
+    border: 2.1px solid #00fff7;
+    border-radius: 13px;
+    padding: 0.6rem 1.02rem;
+    font-size: 0.85rem;
+    font-weight: bold;
+    box-shadow: 0 0 16px #00fff7, 0 0 32px #ff6fff;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s, border 0.2s, box-shadow 0.2s;
+    outline: none;
+    width: 100%;
+    max-width: 468px;
+    min-height: 47px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: left;
+    line-height: 1.02;
+    letter-spacing: 0.43px;
+    position: relative;
+}
+
+.upgrade-btn .upgrade-line1 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.17rem;
+}
+
+.upgrade-btn .upgrade-title {
+    font-size: 0.94rem;
+    font-weight: bold;
+    color: #ffffff;
+    text-shadow: 0 0 8px #00fff7;
+    margin-right: 0.43rem;
+}
+
+.upgrade-btn .upgrade-desc {
+    font-size: 0.72rem;
+    color: #ccc;
+    flex: 1;
+}
+
+.upgrade-btn .upgrade-line2 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.68rem;
+}
+
+.upgrade-btn .upgrade-cost {
+    color: #ffffff;
+    font-weight: bold;
+}
+
+.upgrade-btn .upgrade-owned {
+    color: #ffffff;
+}
+
+.upgrade-btn .upgrade-mps {
+    color: #90EE90;
+}
+/* Upgrades header styling */
+.upgrades-header {
+    display: block;
+    text-align: center;
+    font-size: 1.36rem;
+    letter-spacing: 0.85px;
+    font-family: 'Quicksand', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-weight: 700;
+    margin: 0 0 0.85rem 0;
+    color: #ffffff;
+    background: none;
+    border: 0;
+    border-radius: 0;
+    padding: 0;
+    box-shadow: none;
+    text-shadow: 0 0 8px #00fff7, 0 0 12px #ff6fff;
+}
+.upgrade-btn:hover, .upgrade-btn:focus {
+    background: linear-gradient(135deg, #00fff7 0%, #ff6fff 100%);
+    color: #181c2b;
+    border: 2.5px solid #ff6fff;
+    box-shadow: 0 0 32px #ff6fff, 0 0 48px #00fff7;
+}
+.upgrade-btn:active {
+    background: linear-gradient(135deg, #1a0036 0%, #181c2b 100%);
+    border: 2.5px solid #ff6fff;
+    animation: upgrade-btn-click 0.18s cubic-bezier(.4,2,.6,1) both;
+}
+
+@keyframes upgrade-btn-click {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(0.93);
+    }
+    100% {
+        transform: scale(1.07);
+    }
+}
+
+/* Modals */
+.modal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(24, 28, 43, 0.85);
+    z-index: 9999;
+}
+.modal.hidden {
+    display: none;
+}
+.modal-content {
+    background: #181c2b;
+    border-radius: 24px;
+    padding: 2rem 2.5rem;
+    box-shadow: 0 0 32px #00fff7, 0 0 64px #ff6fff;
+    color: #fff;
+    min-width: 320px;
+    max-width: 90vw;
+    position: relative;
+    text-align: center;
+}
+.close {
+    position: absolute;
+    top: 1rem;
+    right: 1.5rem;
+    font-size: 2rem;
+    color: #ff6fff;
+    cursor: pointer;
+    text-shadow: 0 0 8px #00fff7;
+}
+.cat-photos {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin: 1rem 0 1.5rem 0;
+}
+.cat-photo {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 3px solid #ff6fff;
+    box-shadow: 0 0 8px #00fff7;
+    cursor: pointer;
+    transition: border 0.2s, box-shadow 0.2s, transform 0.1s;
+    background: #fff;
+}
+.cat-photo.selected {
+    border: 3px solid #00fff7;
+    box-shadow: 0 0 16px #00fff7, 0 0 32px #ff6fff;
+    transform: scale(1.1);
+}
+#profileName {
+    border-radius: 12px;
+    border: 2px solid #ff6fff;
+    padding: 0.5rem 1rem;
+    font-size: 1.1rem;
+    outline: none;
+    background: #fff;
+    color: #ff6fff;
+    box-shadow: 0 0 8px #00fff7;
+    text-align: center;
+    margin-bottom: 1.2rem;
+}
+#saveProfile {
+    background: linear-gradient(135deg, #ff6fff 0%, #00fff7 100%);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 0.6rem 1.5rem;
+    font-size: 1.1rem;
+    font-weight: bold;
+    box-shadow: 0 0 8px #ff6fff, 0 0 16px #00fff7;
+    cursor: pointer;
+    margin-top: 1rem;
+    transition: background 0.2s, transform 0.1s;
+}
+#saveProfile:active {
+    background: linear-gradient(135deg, #00fff7 0%, #ff6fff 100%);
+    transform: scale(1.05);
+}
+#leaderboardList {
+    list-style: decimal inside;
+    color: #ff6fff;
+    font-size: 1.1rem;
+    padding-left: 0;
+    margin: 0;
+}
+#leaderboardList li {
+    margin-bottom: 0.3rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+#leaderboardList img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid #00fff7;
+    margin-right: 0.3rem;
+}
+
+@media (max-width: 600px) {
+    .stats {
+        max-width: 320px;
+        gap: 0.5rem 0.5rem;
+    }
+    .upgrade-btn {
+        background: linear-gradient(135deg, #181c2b 60%, #1a0036 100%);
+        color: #fff;
+        border: 2.5px solid #00fff7;
+        border-radius: 999px !important;
+        padding: 1.2rem 2.2rem;
+        font-size: 1.25rem;
+        font-weight: bold;
+        box-shadow: 0 0 16px #00fff7, 0 0 32px #ff6fff;
+        cursor: pointer;
+        transition: background 0.2s, transform 0.1s, border 0.2s, box-shadow 0.2s;
+        margin-bottom: 0.7rem;
+        letter-spacing: 1px;
+        outline: none;
+        min-width: 180px;
+        min-height: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        white-space: normal;
+        word-break: break-word;
+        text-align: center;
+        line-height: 1.4;
+        box-sizing: border-box;
+    }
+    }
