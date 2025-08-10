@@ -218,6 +218,9 @@ const profileBtn = document.getElementById('profileBtn');
 const leaderboardBtn = document.getElementById('leaderboardBtn');
 const profileModal = document.getElementById('profileModal');
 const leaderboardModal = document.getElementById('leaderboardModal');
+const achievementBanner = document.getElementById('achievementBanner');
+const bannerText = document.getElementById('bannerText');
+const closeBanner = document.getElementById('closeBanner');
 const closeProfile = document.getElementById('closeProfile');
 const closeLeaderboard = document.getElementById('closeLeaderboard');
 const profileNameInput = document.getElementById('profileName');
@@ -228,6 +231,29 @@ const leaderboardList = document.getElementById('leaderboardList');
 const achievementsSection = document.querySelector('.achievements');
 const catClickerSection = document.querySelector('.cat-clicker');
 const upgradesSection = document.querySelector('.upgrades');
+
+// --- Achievement Banner Functions ---
+function showAchievementBanner(message) {
+    if (bannerText && achievementBanner) {
+        bannerText.textContent = message;
+        achievementBanner.classList.remove('hidden');
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+            if (achievementBanner) {
+                achievementBanner.classList.add('hidden');
+            }
+        }, 5000);
+    }
+}
+
+// Close banner functionality
+if (closeBanner) {
+    closeBanner.onclick = () => {
+        if (achievementBanner) {
+            achievementBanner.classList.add('hidden');
+        }
+    };
+}
 
 // --- Image helpers & fallbacks ---
 const DEFAULT_CAT = 'cat.png';
@@ -316,7 +342,7 @@ function applyOfflineProgress() {
         const offlineMeows = meowsPerSecond * elapsed;
         state.meowCount += offlineMeows;
         setTimeout(() => {
-            alert(`Welcome back! While you were away, your cats collected ${Math.floor(offlineMeows)} meows!`);
+            showAchievementBanner(`Welcome back! While you were away, your cats collected ${Math.floor(offlineMeows)} meows!`);
         }, 500);
     }
 }
@@ -450,10 +476,8 @@ function checkAchievements() {
         if (!stateAchievement.unlocked && achievement.check()) {
             stateAchievement.unlocked = true;
             renderAchievements();
-            // Show notification
-            setTimeout(() => {
-                alert(`Achievement Unlocked: ${achievement.name}!\n${achievement.desc}\nClick to activate for +${achievement.reward} meows per click!`);
-            }, 100);
+            // Show banner notification instead of alert
+            showAchievementBanner(`Achievement Unlocked: ${achievement.name}! Click to activate for +${achievement.reward} meows per click!`);
         }
     });
 }
@@ -523,7 +547,7 @@ Object.keys(achievementBtns).forEach(id => {
                 updateStats();
                 renderAchievements();
                 saveState();
-                alert(`${achievement.name} activated!\n+${achievement.reward} meows per click!`);
+                showAchievementBanner(`${achievement.name} activated! +${achievement.reward} meows per click!`);
                 // Extra safety: apply glow immediately on activation
                 if (id === 'fiftyUpgrades') {
                     const goldActive = !!(state.achievements.millionMeows && state.achievements.millionMeows.activated);
