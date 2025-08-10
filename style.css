@@ -423,7 +423,10 @@ body {
         object-position: center !important;
         border-radius: 50% !important;
         display: block !important;
-        background: transparent !important;
+        background: none !important;
+        box-shadow: none !important;
+        filter: none !important;
+        border: none !important;
     }
     
     #catFallback {
@@ -520,7 +523,10 @@ body {
         object-position: center !important;
         border-radius: 50% !important;
         display: block !important;
-        background: transparent !important;
+        background: none !important;
+        box-shadow: none !important;
+        filter: none !important;
+        border: none !important;
     }
     
     #catFallback {
@@ -594,12 +600,10 @@ body {
     object-fit: cover;
     object-position: center;
     border-radius: 50%;
-    filter: drop-shadow(0 0 18px #00fff7) drop-shadow(0 0 32px #ff6fff);
     transition: transform 0.1s;
-    background: transparent;
+    background: none;
     display: block;
     margin: 0 auto;
-    box-shadow: 0 0 24px #00fff7, 0 0 32px #ff6fff;
 }
 
 #catFallback {
