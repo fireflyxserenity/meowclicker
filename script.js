@@ -293,7 +293,7 @@ function validatePhotoPath(p) {
 function saveState() {
     state.lastActive = Date.now();
     localStorage.setItem('catClickerState', JSON.stringify(state));
-    saveToLeaderboard();
+    saveToGlobalLeaderboard();
 }
 function loadState() {
     const s = localStorage.getItem('catClickerState');
@@ -639,8 +639,57 @@ setInterval(() => {
     saveState();
 }, 100);
 
-// --- Leaderboard (local, per device) ---
-function saveToLeaderboard() {
+// --- Leaderboard (global) ---
+const GLOBAL_LEADERBOARD_URL = 'https://api.jsonbin.io/v3/b/67770a52ad19ca34f8d4c8a2';
+
+async function saveToGlobalLeaderboard() {
+    try {
+        // Get current global leaderboard
+        const response = await fetch(GLOBAL_LEADERBOARD_URL + '/latest', {
+            headers: {
+                'X-Master-Key': '$2a$10$8Vw8W7qZ.QX6X8R4T5n7keJ7GqM2hU9nP4xL3mV6cA8wQ1sD2fE9G'
+            }
+        });
+        
+        let globalBoard = [];
+        if (response.ok) {
+            const data = await response.json();
+            globalBoard = data.record.leaderboard || [];
+        }
+        
+        // Remove any existing entry for this player
+        globalBoard = globalBoard.filter(u => u.name !== state.profile.name);
+        
+        // Add current player
+        globalBoard.push({
+            name: state.profile.name,
+            photo: state.profile.photo,
+            meows: Math.floor(state.meowCount),
+            timestamp: Date.now()
+        });
+        
+        // Sort and keep top 50
+        globalBoard.sort((a, b) => b.meows - a.meows);
+        globalBoard = globalBoard.slice(0, 50);
+        
+        // Save back to global leaderboard
+        await fetch(GLOBAL_LEADERBOARD_URL, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Master-Key': '$2a$10$8Vw8W7qZ.QX6X8R4T5n7keJ7GqM2hU9nP4xL3mV6cA8wQ1sD2fE9G'
+            },
+            body: JSON.stringify({ leaderboard: globalBoard })
+        });
+        
+    } catch (error) {
+        console.log('Failed to update global leaderboard:', error);
+        // Fallback to local leaderboard if global fails
+        saveToLocalLeaderboard();
+    }
+}
+
+function saveToLocalLeaderboard() {
     let board = [];
     try {
         board = JSON.parse(localStorage.getItem('catClickerLeaderboard') || '[]');
@@ -658,30 +707,84 @@ function saveToLeaderboard() {
     board = board.slice(0, 10);
     localStorage.setItem('catClickerLeaderboard', JSON.stringify(board));
 }
-function renderLeaderboard() {
-    let board = [];
+
+async function renderLeaderboard() {
     try {
-        board = JSON.parse(localStorage.getItem('catClickerLeaderboard') || '[]');
-    } catch {}
-    leaderboardList.innerHTML = '';
-    board.forEach((u, i) => {
-    const li = document.createElement('li');
-    const img = document.createElement('img');
-    img.alt = 'cat';
-    img.src = validatePhotoPath(u.photo);
-    img.onerror = () => { img.src = DEFAULT_CAT; };
-    const name = document.createElement('b');
-    name.textContent = u.name;
-    const span = document.createElement('span');
-    span.textContent = u.meows;
-    li.appendChild(img);
-    li.appendChild(document.createTextNode(' '));
-    li.appendChild(name);
-    li.appendChild(document.createTextNode(': '));
-    li.appendChild(span);
-    li.appendChild(document.createTextNode(' meows'));
-    leaderboardList.appendChild(li);
-    });
+        // Try to get global leaderboard first
+        const response = await fetch(GLOBAL_LEADERBOARD_URL + '/latest', {
+            headers: {
+                'X-Master-Key': '$2a$10$8Vw8W7qZ.QX6X8R4T5n7keJ7GqM2hU9nP4xL3mV6cA8wQ1sD2fE9G'
+            }
+        });
+        
+        let board = [];
+        if (response.ok) {
+            const data = await response.json();
+            board = data.record.leaderboard || [];
+        } else {
+            throw new Error('Global leaderboard unavailable');
+        }
+        
+        // Display global leaderboard
+        leaderboardList.innerHTML = '<p style="color: #00fff7; font-size: 0.9rem; margin-bottom: 1rem;">🌍 Global Leaderboard - Top Players Worldwide!</p>';
+        
+        board.slice(0, 15).forEach((u, i) => {
+            const li = document.createElement('li');
+            const img = document.createElement('img');
+            img.alt = 'cat';
+            img.src = validatePhotoPath(u.photo);
+            img.onerror = () => { img.src = DEFAULT_CAT; };
+            const name = document.createElement('b');
+            name.textContent = u.name;
+            const span = document.createElement('span');
+            span.textContent = u.meows.toLocaleString();
+            
+            // Highlight current player
+            if (u.name === state.profile.name) {
+                li.style.background = 'rgba(0, 255, 255, 0.1)';
+                li.style.border = '1px solid #00fff7';
+                li.style.borderRadius = '8px';
+                li.style.padding = '0.3rem';
+                li.style.margin = '0.2rem 0';
+            }
+            
+            li.appendChild(img);
+            li.appendChild(document.createTextNode(' '));
+            li.appendChild(name);
+            li.appendChild(document.createTextNode(': '));
+            li.appendChild(span);
+            li.appendChild(document.createTextNode(' meows'));
+            leaderboardList.appendChild(li);
+        });
+        
+    } catch (error) {
+        console.log('Failed to load global leaderboard, using local:', error);
+        // Fallback to local leaderboard
+        let board = [];
+        try {
+            board = JSON.parse(localStorage.getItem('catClickerLeaderboard') || '[]');
+        } catch {}
+        
+        leaderboardList.innerHTML = '<p style="color: #ff6fff; font-size: 0.9rem; margin-bottom: 1rem;">📱 Local Leaderboard (Global unavailable)</p>';
+        board.forEach((u, i) => {
+            const li = document.createElement('li');
+            const img = document.createElement('img');
+            img.alt = 'cat';
+            img.src = validatePhotoPath(u.photo);
+            img.onerror = () => { img.src = DEFAULT_CAT; };
+            const name = document.createElement('b');
+            name.textContent = u.name;
+            const span = document.createElement('span');
+            span.textContent = u.meows;
+            li.appendChild(img);
+            li.appendChild(document.createTextNode(' '));
+            li.appendChild(name);
+            li.appendChild(document.createTextNode(': '));
+            li.appendChild(span);
+            li.appendChild(document.createTextNode(' meows'));
+            leaderboardList.appendChild(li);
+        });
+    }
 }
 
 // --- Modal logic ---
