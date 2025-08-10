@@ -78,7 +78,8 @@ let state = {
         name: 'Cat Lover',
         photo: 'cat.png'
     },
-    lastActive: Date.now()
+    lastActive: Date.now(),
+    globalLeaderboardOptIn: false // Track if user has joined global leaderboard
 };
 let meowsPerSecond = 0;
 
@@ -665,12 +666,17 @@ const GLOBAL_SAVE_COOLDOWN = 5000; // 5 seconds between saves
 const GLOBAL_LOAD_COOLDOWN = 2000; // 2 seconds between loads
 
 async function saveToGlobalLeaderboard() {
+    // Only save to global if user has opted in by viewing leaderboard
+    if (!state.globalLeaderboardOptIn) {
+        console.log('User not opted into global leaderboard yet - waiting for first leaderboard view');
+        return;
+    }
+    
     const now = Date.now();
     
     // Rate limit: don't save more than once every 5 seconds
     if (now - lastGlobalSave < GLOBAL_SAVE_COOLDOWN) {
-        console.log('Global leaderboard save rate limited, using local fallback');
-        saveToLocalLeaderboard();
+        console.log('Global leaderboard save rate limited');
         return;
     }
     
@@ -701,33 +707,19 @@ async function saveToGlobalLeaderboard() {
         
     } catch (error) {
         console.log('Failed to update global leaderboard:', error);
-        // Fallback to local leaderboard if global fails
-        saveToLocalLeaderboard();
     }
 }
 
-function saveToLocalLeaderboard() {
-    let board = [];
-    try {
-        board = JSON.parse(localStorage.getItem('catClickerLeaderboard') || '[]');
-    } catch {}
-    // Remove old entry for this name
-    board = board.filter(u => u.name !== state.profile.name);
-    // Add current
-    board.push({
-        name: state.profile.name,
-        photo: state.profile.photo,
-        meows: Math.floor(state.meowCount),
-        timestamp: Date.now()
-    });
-    // Sort and keep top 50 (increased from 10)
-    board.sort((a, b) => b.meows - a.meows);
-    board = board.slice(0, 50);
-    localStorage.setItem('catClickerLeaderboard', JSON.stringify(board));
-}
+// Global leaderboard is the only leaderboard system now
 
 async function renderLeaderboard() {
     const now = Date.now();
+    
+    // If user hasn't opted in, show invitation to join global leaderboard
+    if (!state.globalLeaderboardOptIn) {
+        renderGlobalLeaderboardInvite();
+        return;
+    }
     
     // Rate limit: don't load more than once every 2 seconds
     if (now - lastGlobalLoad < GLOBAL_LOAD_COOLDOWN) {
@@ -742,6 +734,9 @@ async function renderLeaderboard() {
             globalLeaderboardDemo = JSON.parse(saved);
         }
         
+        // Update player's current score in global leaderboard
+        saveToGlobalLeaderboard();
+        
         let board = globalLeaderboardDemo;
         lastGlobalLoad = now;
         
@@ -749,7 +744,7 @@ async function renderLeaderboard() {
         leaderboardList.innerHTML = '<p style="color: #00fff7; font-size: 0.9rem; margin-bottom: 1rem;">🌍 Global Leaderboard - Top 50 Players Worldwide!</p>';
         
         if (board.length === 0) {
-            leaderboardList.innerHTML += '<p style="color: #aaa; font-style: italic;">No global players yet - be the first!</p>';
+            leaderboardList.innerHTML += '<p style="color: #aaa; font-style: italic;">No global players yet - you will be the first!</p>';
             return;
         }
         
@@ -827,97 +822,30 @@ async function renderLeaderboard() {
         
     } catch (error) {
         console.log('Failed to load global leaderboard:', error.message);
-        renderLocalLeaderboard();
+        leaderboardList.innerHTML = '<p style="color: #ff6666; font-size: 0.9rem;">⚠️ Global leaderboard temporarily unavailable</p>';
     }
 }
 
-function renderLocalLeaderboard() {
-    // Enhanced local leaderboard with full features
-    let board = [];
-    try {
-        board = JSON.parse(localStorage.getItem('catClickerLeaderboard') || '[]');
-    } catch {}
-    
-    const statusText = '🏆 Local Leaderboard - Top Players on This Device!';
-    leaderboardList.innerHTML = `<p style="color: #ffd700; font-size: 0.9rem; margin-bottom: 1rem;">${statusText}</p>`;
-    
-    if (board.length === 0) {
-        leaderboardList.innerHTML += '<p style="color: #aaa; font-style: italic;">No players yet - be the first!</p>';
-        return;
-    }
-    
-    board.forEach((u, i) => {
-        const li = document.createElement('li');
-        
-        // Add ranking with medals/numbers
-        const rank = document.createElement('span');
-        rank.style.fontWeight = 'bold';
-        rank.style.marginRight = '0.5rem';
-        rank.style.minWidth = '2rem';
-        rank.style.display = 'inline-block';
-        rank.style.textAlign = 'center';
-        
-        if (i === 0) {
-            rank.textContent = '🥇';
-            rank.style.fontSize = '1.2rem';
-            rank.title = '1st Place - Local Champion!';
-        } else if (i === 1) {
-            rank.textContent = '🥈';
-            rank.style.fontSize = '1.1rem';
-            rank.title = '2nd Place - Local Runner-up!';
-        } else if (i === 2) {
-            rank.textContent = '🥉';
-            rank.style.fontSize = '1.1rem';
-            rank.title = '3rd Place - Local Bronze!';
-        } else {
-            rank.textContent = `${i + 1}.`;
-            rank.style.color = '#ffd700';
-            rank.style.fontSize = '0.9rem';
-        }
-        
-        const img = document.createElement('img');
-        img.alt = 'cat';
-        img.src = validatePhotoPath(u.photo);
-        img.onerror = () => { img.src = DEFAULT_CAT; };
-        
-        const name = document.createElement('b');
-        name.textContent = u.name;
-        
-        const span = document.createElement('span');
-        span.textContent = u.meows.toLocaleString();
-        
-        // Special styling for top 3
-        if (i < 3) {
-            li.style.background = i === 0 ? 'rgba(255, 215, 0, 0.1)' : i === 1 ? 'rgba(192, 192, 192, 0.1)' : 'rgba(205, 127, 50, 0.1)';
-            li.style.border = i === 0 ? '1px solid gold' : i === 1 ? '1px solid silver' : '1px solid #cd7f32';
-            li.style.borderRadius = '8px';
-            li.style.padding = '0.4rem';
-            li.style.margin = '0.3rem 0';
-            name.style.color = i === 0 ? '#ffd700' : i === 1 ? '#c0c0c0' : '#cd7f32';
-        }
-        
-        // Highlight current player (override top 3 styling if needed)
-        if (u.name === state.profile.name) {
-            li.style.background = 'rgba(255, 215, 0, 0.2)';
-            li.style.border = '2px solid #ffd700';
-            li.style.borderRadius = '8px';
-            li.style.padding = '0.4rem';
-            li.style.margin = '0.3rem 0';
-            li.style.boxShadow = '0 0 10px rgba(255, 215, 0, 0.3)';
-            name.style.color = '#ffd700';
-            name.textContent += ' (You)';
-        }
-        
-        li.appendChild(rank);
-        li.appendChild(img);
-        li.appendChild(document.createTextNode(' '));
-        li.appendChild(name);
-        li.appendChild(document.createTextNode(': '));
-        li.appendChild(span);
-        li.appendChild(document.createTextNode(' meows'));
-        leaderboardList.appendChild(li);
-    });
+function renderGlobalLeaderboardInvite() {
+    // Show invitation to join global leaderboard
+    leaderboardList.innerHTML = `
+        <div style="text-align: center; padding: 2rem 1rem;">
+            <h3 style="color: #00fff7; margin-bottom: 1rem;">🌍 Join Global Competition!</h3>
+            <p style="color: #fff; margin-bottom: 1.5rem; line-height: 1.4;">
+                Ready to compete with players worldwide?<br>
+                Your current progress: <strong>${Math.floor(state.meowCount).toLocaleString()} meows</strong>
+            </p>
+            <p style="color: #ffd700; font-size: 0.9rem; margin-bottom: 1.5rem;">
+                🏆 By viewing this leaderboard, you'll be added to the global rankings!
+            </p>
+            <p style="color: #aaa; font-size: 0.8rem;">
+                Click anywhere outside this message to join the worldwide competition.
+            </p>
+        </div>
+    `;
 }
+
+// Remove local leaderboard functions - no longer needed
 
 // --- Modal logic ---
 if (profileBtn && profileModal && closeProfile) {
@@ -926,6 +854,16 @@ if (profileBtn && profileModal && closeProfile) {
 }
 if (leaderboardBtn && leaderboardModal && closeLeaderboard) {
     leaderboardBtn.onclick = () => {
+        // First time clicking leaderboard - opt into global system
+        if (!state.globalLeaderboardOptIn) {
+            state.globalLeaderboardOptIn = true;
+            saveState(); // Save the opt-in preference
+            showAchievementBanner('🌍 Welcome to Global Competition! You are now competing worldwide!');
+            
+            // Immediately update global leaderboard with current progress
+            saveToGlobalLeaderboard();
+        }
+        
         renderLeaderboard();
         leaderboardModal.classList.remove('hidden');
     };
