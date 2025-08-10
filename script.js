@@ -139,50 +139,50 @@ const achievements = {
     firstMeow: {
         name: 'First Meow',
         desc: 'Click the cat for the first time',
-        reward: 1,
+        reward: 2,
         check: () => state.totalClicks >= 1
     },
     hundredMeows: {
         name: 'Meow Century',
-        desc: 'Reach 100 total meows',
-        reward: 2,
-        check: () => state.meowCount >= 100
+        desc: 'Reach 10,000 total meows',
+        reward: 10,
+        check: () => state.meowCount >= 10000
     },
     firstUpgrade: {
         name: 'First Upgrade',
         desc: 'Purchase your first upgrade',
-        reward: 3,
+        reward: 5,
         check: () => state.upgrades.some(count => count > 0)
     },
     thousandMeows: {
         name: 'Meow Thousand',
-        desc: 'Reach 1,000 total meows',
-        reward: 5,
-        check: () => state.meowCount >= 1000
+        desc: 'Reach 500,000 total meows',
+        reward: 25,
+        check: () => state.meowCount >= 500000
     },
     tenUpgrades: {
         name: 'Upgrade Master',
-        desc: 'Own 10 total upgrades',
-        reward: 10,
-        check: () => state.upgrades.reduce((sum, count) => sum + count, 0) >= 10
-    },
-    hundredThousandMeows: {
-        name: 'Meow Mogul',
-        desc: 'Reach 100,000 total meows',
-        reward: 25,
-        check: () => state.meowCount >= 100000
-    },
-    millionMeows: {
-        name: 'Meow Millionaire',
-        desc: 'Reach 1,000,000 total meows',
-        reward: 100,
-        check: () => state.meowCount >= 1000000
-    },
-    fiftyUpgrades: {
-        name: 'Upgrade Legend',
         desc: 'Own 50 total upgrades',
         reward: 50,
         check: () => state.upgrades.reduce((sum, count) => sum + count, 0) >= 50
+    },
+    hundredThousandMeows: {
+        name: 'Meow Mogul',
+        desc: 'Reach 25,000,000 total meows',
+        reward: 100,
+        check: () => state.meowCount >= 25000000
+    },
+    millionMeows: {
+        name: 'Meow Millionaire',
+        desc: 'Reach 1,000,000,000 total meows',
+        reward: 500,
+        check: () => state.meowCount >= 1000000000
+    },
+    fiftyUpgrades: {
+        name: 'Upgrade Legend',
+        desc: 'Own 200 total upgrades',
+        reward: 250,
+        check: () => state.upgrades.reduce((sum, count) => sum + count, 0) >= 200
     }
 };
 
