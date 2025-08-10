@@ -33,13 +33,6 @@
         <div class="stat"><span id="totalClicks">0</span><br>Total Clicks</div>
     </section>
 
-    <div style="text-align:center;margin-bottom:1.5rem;">
-        <button id="downloadDataBtn" class="header-btn">Download Data</button>
-        <label for="uploadDataInput" class="header-btn" style="cursor:pointer;display:inline-block;">Upload Data
-            <input type="file" id="uploadDataInput" accept="application/json" style="display:none;">
-        </label>
-    </div>
-
     <main class="main-content">
         <div class="game-layout">
             <div class="cat-clicker">
@@ -96,6 +89,14 @@
                 <img src="https://cdn3.emoji.gg/emojis/5802-cat-wtf.png" class="cat-photo" data-cat="https://cdn3.emoji.gg/emojis/5802-cat-wtf.png">
             </div>
             <button id="saveProfile">Save</button>
+            
+            <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 2px solid #ff6fff;">
+                <h4 style="color: #fff; margin-bottom: 1rem;">Backup & Restore</h4>
+                <button id="downloadDataBtn" class="header-btn" style="margin: 0.5rem;">Download Save</button>
+                <label for="uploadDataInput" class="header-btn" style="cursor:pointer;display:inline-block;margin: 0.5rem;">Upload Save
+                    <input type="file" id="uploadDataInput" accept="application/json" style="display:none;">
+                </label>
+            </div>
         </div>
     </div>
 
