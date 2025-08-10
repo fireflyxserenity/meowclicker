@@ -51,12 +51,11 @@ if (uploadDataInput) {
 // Cat photo options (use local images for now)
 const catPhotos = [
     'cat.png',
-    'cat1.png',
-    'cat2.png',
-    'cat3.png',
-    'cat4.png',
-    'cat5.png',
-    'cat6.png'
+    'https://cdn3.emoji.gg/emojis/7482-uwucat.png',
+    'https://cdn3.emoji.gg/emojis/3301-kitty-blush.png',
+    'https://emoji.gg/assets/emoji/5903-cute-cat.png',
+    'https://cdn3.emoji.gg/emojis/8793-beluga.png',
+    'https://cdn3.emoji.gg/emojis/5802-cat-wtf.png'
 ];
 
 // Default state
@@ -280,7 +279,12 @@ function setMainCatSrc(src) {
 function validatePhotoPath(p) {
     // Accept only known filenames; actual file existence will be handled by onerror
     const allowed = [
-        'cat.png', 'cat1.png', 'cat2.png', 'cat3.png', 'cat4.png', 'cat5.png', 'cat6.png'
+        'cat.png', 
+        'https://cdn3.emoji.gg/emojis/7482-uwucat.png',
+        'https://cdn3.emoji.gg/emojis/3301-kitty-blush.png',
+        'https://emoji.gg/assets/emoji/5903-cute-cat.png',
+        'https://cdn3.emoji.gg/emojis/8793-beluga.png',
+        'https://cdn3.emoji.gg/emojis/5802-cat-wtf.png'
     ];
     return allowed.includes(p) ? p : DEFAULT_CAT;
 }
