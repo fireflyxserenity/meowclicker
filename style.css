@@ -861,17 +861,22 @@ body {
     transform: scale(1.05);
 }
 #leaderboardList {
-    list-style: decimal inside;
+    list-style: none !important;
     color: #ff6fff;
     font-size: 1.1rem;
     padding-left: 0;
     margin: 0;
 }
 #leaderboardList li {
-    margin-bottom: 0.3rem;
+    margin-bottom: 0.4rem;
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    transition: all 0.3s ease;
+    list-style: none !important;
+}
+#leaderboardList li:hover {
+    transform: translateX(5px);
 }
 #leaderboardList img {
     width: 32px;
@@ -879,6 +884,27 @@ body {
     border-radius: 50%;
     border: 2px solid #00fff7;
     margin-right: 0.3rem;
+    transition: transform 0.2s ease;
+}
+#leaderboardList li:hover img {
+    transform: scale(1.1);
+}
+
+/* Medal styling enhancements */
+.leaderboard-rank-1 {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.2) 0%, rgba(255, 215, 0, 0.1) 100%) !important;
+    border: 2px solid #ffd700 !important;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.3) !important;
+}
+.leaderboard-rank-2 {
+    background: linear-gradient(135deg, rgba(192, 192, 192, 0.2) 0%, rgba(192, 192, 192, 0.1) 100%) !important;
+    border: 2px solid #c0c0c0 !important;
+    box-shadow: 0 0 10px rgba(192, 192, 192, 0.3) !important;
+}
+.leaderboard-rank-3 {
+    background: linear-gradient(135deg, rgba(205, 127, 50, 0.2) 0%, rgba(205, 127, 50, 0.1) 100%) !important;
+    border: 2px solid #cd7f32 !important;
+    box-shadow: 0 0 10px rgba(205, 127, 50, 0.3) !important;
 }
 
 
