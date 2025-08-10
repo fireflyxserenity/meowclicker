@@ -255,6 +255,46 @@ if (closeBanner) {
     };
 }
 
+// --- Number formatting helpers ---
+function formatNumber(num) {
+    // Only format numbers trillion and above, use commas for smaller numbers
+    if (num < 1e12) {
+        return Math.floor(num).toLocaleString();
+    }
+    
+    const units = [
+        { value: 1e63, name: 'Vig' },    // vigintillion
+        { value: 1e60, name: 'Novd' },   // novemdecillion
+        { value: 1e57, name: 'Octd' },   // octodecillion
+        { value: 1e54, name: 'Septd' },  // septendecillion
+        { value: 1e51, name: 'Sexd' },   // sexdecillion
+        { value: 1e48, name: 'Quid' },   // quindecillion
+        { value: 1e45, name: 'Quat' },   // quattuordecillion
+        { value: 1e42, name: 'Tred' },   // tredecillion
+        { value: 1e39, name: 'Duod' },   // duodecillion
+        { value: 1e36, name: 'Unde' },   // undecillion
+        { value: 1e33, name: 'Dec' },    // decillion
+        { value: 1e30, name: 'Non' },    // nonillion
+        { value: 1e27, name: 'Oct' },    // octillion
+        { value: 1e24, name: 'Sept' },   // septillion
+        { value: 1e21, name: 'Sext' },   // sextillion
+        { value: 1e18, name: 'Quint' },  // quintillion
+        { value: 1e15, name: 'Quad' },   // quadrillion
+        { value: 1e12, name: 'Trill' }   // trillion
+    ];
+    
+    for (const unit of units) {
+        if (num >= unit.value) {
+            const formatted = (num / unit.value).toFixed(3);
+            // Remove unnecessary trailing zeros but keep at least 1 decimal place
+            const cleaned = parseFloat(formatted).toString();
+            return cleaned + unit.name;
+        }
+    }
+    
+    return Math.floor(num).toLocaleString();
+}
+
 // --- Image helpers & fallbacks ---
 const DEFAULT_CAT = 'cat.png';
 
@@ -354,7 +394,7 @@ function applyOfflineProgress() {
         const offlineMeows = meowsPerSecond * elapsed;
         state.meowCount += offlineMeows;
         setTimeout(() => {
-            showAchievementBanner(`Welcome back! While you were away, your cats collected ${Math.floor(offlineMeows)} meows!`);
+            showAchievementBanner(`Welcome back! While you were away, your cats collected ${formatNumber(offlineMeows)} meows!`);
         }, 500);
     }
 }
@@ -406,9 +446,9 @@ function renderUpgrades() {
                 <span class="upgrade-desc">${upg.desc}</span>
             </div>
             <div class="upgrade-line2">
-                <span class="upgrade-mps">+${upg.mps}/sec</span>
+                <span class="upgrade-mps">+${formatNumber(upg.mps)}/sec</span>
                 <span class="upgrade-owned">Owned: ${state.upgrades[i]}</span>
-                <span class="upgrade-cost">Cost: ${cost}</span>
+                <span class="upgrade-cost">Cost: ${formatNumber(cost)}</span>
             </div>
         `;
     // Use floored meows to match the displayed Total Meows and avoid confusion
@@ -508,7 +548,7 @@ function renderAchievements() {
         btn.innerHTML = `
             <div class="achievement-title">${achievement.name}</div>
             <div class="achievement-desc">${achievement.desc}</div>
-            <div class="achievement-reward">+${achievement.reward} meows/click</div>
+            <div class="achievement-reward">+${formatNumber(achievement.reward)} meows/click</div>
         `;
         
         // Reset classes
@@ -521,7 +561,7 @@ function renderAchievements() {
             btn.innerHTML = `
                 <div class="achievement-title">${achievement.name} ✓</div>
                 <div class="achievement-desc">${achievement.desc}</div>
-                <div class="achievement-reward">+${achievement.reward} meows/click</div>
+                <div class="achievement-reward">+${formatNumber(achievement.reward)} meows/click</div>
             `;
             // Apply glow styles based on activated achievements
             if (id === 'fiftyUpgrades') {
@@ -578,10 +618,10 @@ Object.keys(achievementBtns).forEach(id => {
 
 function updateStats() {
     calcMeowsPerSecond();
-    totalMeowsSpan.textContent = Math.floor(state.meowCount);
-    meowsPerSecondSpan.textContent = meowsPerSecond.toFixed(1);
-    meowsPerClickSpan.textContent = state.meowsPerClick;
-    totalClicksSpan.textContent = state.totalClicks;
+    totalMeowsSpan.textContent = formatNumber(state.meowCount);
+    meowsPerSecondSpan.textContent = formatNumber(meowsPerSecond);
+    meowsPerClickSpan.textContent = formatNumber(state.meowsPerClick);
+    totalClicksSpan.textContent = formatNumber(state.totalClicks);
     checkAchievements();
 }
 
@@ -842,7 +882,7 @@ async function renderLeaderboard() {
             name.textContent = u.name;
             
             const span = document.createElement('span');
-            span.textContent = u.meows.toLocaleString();
+            span.textContent = formatNumber(u.meows);
             
             // Special styling for top 3
             if (i < 3) {
@@ -934,7 +974,7 @@ function renderBackupLeaderboard() {
             name.textContent = u.name;
             
             const span = document.createElement('span');
-            span.textContent = u.meows.toLocaleString();
+            span.textContent = formatNumber(u.meows);
             
             // Highlight current player
             if (u.name === state.profile.name) {
@@ -971,7 +1011,7 @@ function renderGlobalLeaderboardInvite() {
             <h3 style="color: #00fff7; margin-bottom: 1rem;">🌍 Join Global Competition!</h3>
             <p style="color: #fff; margin-bottom: 1.5rem; line-height: 1.4;">
                 Ready to compete with players worldwide?<br>
-                Your current progress: <strong>${Math.floor(state.meowCount).toLocaleString()} meows</strong>
+                Your current progress: <strong>${formatNumber(state.meowCount)} meows</strong>
             </p>
             <p style="color: #ffd700; font-size: 0.9rem; margin-bottom: 1.5rem;">
                 🏆 By viewing this leaderboard, you'll be added to the global rankings!
