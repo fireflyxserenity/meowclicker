@@ -293,6 +293,13 @@ function validatePhotoPath(p) {
 function saveState() {
     state.lastActive = Date.now();
     localStorage.setItem('catClickerState', JSON.stringify(state));
+    // Only call global leaderboard on significant events (not every save)
+    // The global saving is now handled by rate-limited intervals and specific events
+}
+
+function saveStateWithGlobal() {
+    state.lastActive = Date.now();
+    localStorage.setItem('catClickerState', JSON.stringify(state));
     saveToGlobalLeaderboard();
 }
 function loadState() {
@@ -360,7 +367,7 @@ function renderCatPicOptions() {
             state.profile.photo = catPhotos[i];
             renderCatPicOptions();
             setMainCatSrc(catPhotos[i]);
-            saveState();
+            saveStateWithGlobal(); // Photo change - update global
             renderLeaderboard();
         };
     });
@@ -382,7 +389,7 @@ saveProfileBtn.onclick = () => {
     previousProfileName = newName;
     // Close the modal
     profileModal.classList.add('hidden');
-    saveState();
+    saveStateWithGlobal(); // Important profile change - update global
     renderLeaderboard();
     setMainCatSrc(validatePhotoPath(state.profile.photo));
 };
@@ -446,7 +453,7 @@ upgradeBtns.forEach((btn, i) => {
             updateStats();
             setTimeout(() => {
                 renderUpgrades();
-                saveState();
+                saveStateWithGlobal(); // Upgrade purchase - important event for global leaderboard
                 renderLeaderboard();
                 btn.classList.remove('clicked');
             }, 50);
@@ -552,7 +559,7 @@ Object.keys(achievementBtns).forEach(id => {
                 state.meowsPerClick += achievement.reward;
                 updateStats();
                 renderAchievements();
-                saveState();
+                saveStateWithGlobal(); // Achievement activation - important for global leaderboard
                 showAchievementBanner(`${achievement.name} activated! +${achievement.reward} meows per click!`);
                 // Extra safety: apply glow immediately on activation
                 if (id === 'fiftyUpgrades') {
@@ -626,8 +633,9 @@ setInterval(() => {
         clickBuffer = 0;
         updateStats();
         renderUpgrades();
-        saveState();
-        renderLeaderboard();
+        // Only save to local storage here, not global (to avoid rate limits)
+        state.lastActive = Date.now();
+        localStorage.setItem('catClickerState', JSON.stringify(state));
     }
 }, 100);
 
@@ -636,13 +644,35 @@ setInterval(() => {
     state.meowCount += meowsPerSecond / 10;
     updateStats();
     renderUpgrades();
-    saveState();
+    // Only save to local storage here, not global (to avoid rate limits)
+    state.lastActive = Date.now();
+    localStorage.setItem('catClickerState', JSON.stringify(state));
 }, 100);
+
+// Less frequent global leaderboard updates (every 2 minutes when idle)
+setInterval(() => {
+    saveToGlobalLeaderboard();
+}, 120000);
 
 // --- Leaderboard (global) ---
 const GLOBAL_LEADERBOARD_URL = 'https://api.jsonbin.io/v3/b/67770a52ad19ca34f8d4c8a2';
 
+// Rate limiting for API calls
+let lastGlobalSave = 0;
+let lastGlobalLoad = 0;
+const GLOBAL_SAVE_COOLDOWN = 30000; // 30 seconds between saves
+const GLOBAL_LOAD_COOLDOWN = 10000; // 10 seconds between loads
+
 async function saveToGlobalLeaderboard() {
+    const now = Date.now();
+    
+    // Rate limit: don't save more than once every 30 seconds
+    if (now - lastGlobalSave < GLOBAL_SAVE_COOLDOWN) {
+        console.log('Global leaderboard save rate limited, using local fallback');
+        saveToLocalLeaderboard();
+        return;
+    }
+    
     try {
         // Get current global leaderboard
         const response = await fetch(GLOBAL_LEADERBOARD_URL + '/latest', {
@@ -655,6 +685,8 @@ async function saveToGlobalLeaderboard() {
         if (response.ok) {
             const data = await response.json();
             globalBoard = data.record.leaderboard || [];
+        } else if (response.status === 429) {
+            throw new Error('Rate limited');
         }
         
         // Remove any existing entry for this player
@@ -673,7 +705,7 @@ async function saveToGlobalLeaderboard() {
         globalBoard = globalBoard.slice(0, 50);
         
         // Save back to global leaderboard
-        await fetch(GLOBAL_LEADERBOARD_URL, {
+        const saveResponse = await fetch(GLOBAL_LEADERBOARD_URL, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -681,6 +713,13 @@ async function saveToGlobalLeaderboard() {
             },
             body: JSON.stringify({ leaderboard: globalBoard })
         });
+        
+        if (saveResponse.ok) {
+            lastGlobalSave = now;
+            console.log('Successfully saved to global leaderboard');
+        } else {
+            throw new Error(`Save failed: ${saveResponse.status}`);
+        }
         
     } catch (error) {
         console.log('Failed to update global leaderboard:', error);
@@ -709,6 +748,15 @@ function saveToLocalLeaderboard() {
 }
 
 async function renderLeaderboard() {
+    const now = Date.now();
+    
+    // Rate limit: don't load more than once every 10 seconds
+    if (now - lastGlobalLoad < GLOBAL_LOAD_COOLDOWN) {
+        console.log('Global leaderboard load rate limited, using cached/local data');
+        renderLocalLeaderboard();
+        return;
+    }
+    
     try {
         // Try to get global leaderboard first
         const response = await fetch(GLOBAL_LEADERBOARD_URL + '/latest', {
@@ -721,6 +769,9 @@ async function renderLeaderboard() {
         if (response.ok) {
             const data = await response.json();
             board = data.record.leaderboard || [];
+            lastGlobalLoad = now;
+        } else if (response.status === 429) {
+            throw new Error('Rate limited - too many requests');
         } else {
             throw new Error('Global leaderboard unavailable');
         }
@@ -730,24 +781,67 @@ async function renderLeaderboard() {
         
         board.slice(0, 15).forEach((u, i) => {
             const li = document.createElement('li');
+            
+            // Add ranking with medals/numbers
+            const rank = document.createElement('span');
+            rank.style.fontWeight = 'bold';
+            rank.style.marginRight = '0.5rem';
+            rank.style.minWidth = '2rem';
+            rank.style.display = 'inline-block';
+            rank.style.textAlign = 'center';
+            
+            if (i === 0) {
+                rank.textContent = '🥇';
+                rank.style.fontSize = '1.2rem';
+                rank.title = '1st Place - Champion!';
+            } else if (i === 1) {
+                rank.textContent = '🥈';
+                rank.style.fontSize = '1.1rem';
+                rank.title = '2nd Place - Runner-up!';
+            } else if (i === 2) {
+                rank.textContent = '🥉';
+                rank.style.fontSize = '1.1rem';
+                rank.title = '3rd Place - Bronze Medal!';
+            } else {
+                rank.textContent = `${i + 1}.`;
+                rank.style.color = '#00fff7';
+                rank.style.fontSize = '0.9rem';
+            }
+            
             const img = document.createElement('img');
             img.alt = 'cat';
             img.src = validatePhotoPath(u.photo);
             img.onerror = () => { img.src = DEFAULT_CAT; };
+            
             const name = document.createElement('b');
             name.textContent = u.name;
+            
             const span = document.createElement('span');
             span.textContent = u.meows.toLocaleString();
             
-            // Highlight current player
-            if (u.name === state.profile.name) {
-                li.style.background = 'rgba(0, 255, 255, 0.1)';
-                li.style.border = '1px solid #00fff7';
+            // Special styling for top 3
+            if (i < 3) {
+                li.style.background = i === 0 ? 'rgba(255, 215, 0, 0.1)' : i === 1 ? 'rgba(192, 192, 192, 0.1)' : 'rgba(205, 127, 50, 0.1)';
+                li.style.border = i === 0 ? '1px solid gold' : i === 1 ? '1px solid silver' : '1px solid #cd7f32';
                 li.style.borderRadius = '8px';
-                li.style.padding = '0.3rem';
-                li.style.margin = '0.2rem 0';
+                li.style.padding = '0.4rem';
+                li.style.margin = '0.3rem 0';
+                name.style.color = i === 0 ? '#ffd700' : i === 1 ? '#c0c0c0' : '#cd7f32';
             }
             
+            // Highlight current player (override top 3 styling if needed)
+            if (u.name === state.profile.name) {
+                li.style.background = 'rgba(0, 255, 255, 0.2)';
+                li.style.border = '2px solid #00fff7';
+                li.style.borderRadius = '8px';
+                li.style.padding = '0.4rem';
+                li.style.margin = '0.3rem 0';
+                li.style.boxShadow = '0 0 10px rgba(0, 255, 255, 0.3)';
+                name.style.color = '#00fff7';
+                name.textContent += ' (You)';
+            }
+            
+            li.appendChild(rank);
             li.appendChild(img);
             li.appendChild(document.createTextNode(' '));
             li.appendChild(name);
@@ -758,33 +852,92 @@ async function renderLeaderboard() {
         });
         
     } catch (error) {
-        console.log('Failed to load global leaderboard, using local:', error);
-        // Fallback to local leaderboard
-        let board = [];
-        try {
-            board = JSON.parse(localStorage.getItem('catClickerLeaderboard') || '[]');
-        } catch {}
-        
-        leaderboardList.innerHTML = '<p style="color: #ff6fff; font-size: 0.9rem; margin-bottom: 1rem;">📱 Local Leaderboard (Global unavailable)</p>';
-        board.forEach((u, i) => {
-            const li = document.createElement('li');
-            const img = document.createElement('img');
-            img.alt = 'cat';
-            img.src = validatePhotoPath(u.photo);
-            img.onerror = () => { img.src = DEFAULT_CAT; };
-            const name = document.createElement('b');
-            name.textContent = u.name;
-            const span = document.createElement('span');
-            span.textContent = u.meows;
-            li.appendChild(img);
-            li.appendChild(document.createTextNode(' '));
-            li.appendChild(name);
-            li.appendChild(document.createTextNode(': '));
-            li.appendChild(span);
-            li.appendChild(document.createTextNode(' meows'));
-            leaderboardList.appendChild(li);
-        });
+        console.log('Failed to load global leaderboard:', error.message);
+        renderLocalLeaderboard();
     }
+}
+
+function renderLocalLeaderboard() {
+    // Fallback to local leaderboard
+    let board = [];
+    try {
+        board = JSON.parse(localStorage.getItem('catClickerLeaderboard') || '[]');
+    } catch {}
+    
+    const statusText = lastGlobalLoad > 0 ? '📱 Local Leaderboard (Rate limited)' : '📱 Local Leaderboard (Global unavailable)';
+    leaderboardList.innerHTML = `<p style="color: #ff6fff; font-size: 0.9rem; margin-bottom: 1rem;">${statusText}</p>`;
+    
+    board.forEach((u, i) => {
+        const li = document.createElement('li');
+        
+        // Add ranking with medals/numbers
+        const rank = document.createElement('span');
+        rank.style.fontWeight = 'bold';
+        rank.style.marginRight = '0.5rem';
+        rank.style.minWidth = '2rem';
+        rank.style.display = 'inline-block';
+        rank.style.textAlign = 'center';
+        
+        if (i === 0) {
+            rank.textContent = '🥇';
+            rank.style.fontSize = '1.2rem';
+            rank.title = '1st Place - Local Champion!';
+        } else if (i === 1) {
+            rank.textContent = '🥈';
+            rank.style.fontSize = '1.1rem';
+            rank.title = '2nd Place - Local Runner-up!';
+        } else if (i === 2) {
+            rank.textContent = '🥉';
+            rank.style.fontSize = '1.1rem';
+            rank.title = '3rd Place - Local Bronze!';
+        } else {
+            rank.textContent = `${i + 1}.`;
+            rank.style.color = '#ff6fff';
+            rank.style.fontSize = '0.9rem';
+        }
+        
+        const img = document.createElement('img');
+        img.alt = 'cat';
+        img.src = validatePhotoPath(u.photo);
+        img.onerror = () => { img.src = DEFAULT_CAT; };
+        
+        const name = document.createElement('b');
+        name.textContent = u.name;
+        
+        const span = document.createElement('span');
+        span.textContent = u.meows.toLocaleString();
+        
+        // Special styling for top 3
+        if (i < 3) {
+            li.style.background = i === 0 ? 'rgba(255, 215, 0, 0.1)' : i === 1 ? 'rgba(192, 192, 192, 0.1)' : 'rgba(205, 127, 50, 0.1)';
+            li.style.border = i === 0 ? '1px solid gold' : i === 1 ? '1px solid silver' : '1px solid #cd7f32';
+            li.style.borderRadius = '8px';
+            li.style.padding = '0.4rem';
+            li.style.margin = '0.3rem 0';
+            name.style.color = i === 0 ? '#ffd700' : i === 1 ? '#c0c0c0' : '#cd7f32';
+        }
+        
+        // Highlight current player (override top 3 styling if needed)
+        if (u.name === state.profile.name) {
+            li.style.background = 'rgba(255, 111, 255, 0.2)';
+            li.style.border = '2px solid #ff6fff';
+            li.style.borderRadius = '8px';
+            li.style.padding = '0.4rem';
+            li.style.margin = '0.3rem 0';
+            li.style.boxShadow = '0 0 10px rgba(255, 111, 255, 0.3)';
+            name.style.color = '#ff6fff';
+            name.textContent += ' (You)';
+        }
+        
+        li.appendChild(rank);
+        li.appendChild(img);
+        li.appendChild(document.createTextNode(' '));
+        li.appendChild(name);
+        li.appendChild(document.createTextNode(': '));
+        li.appendChild(span);
+        li.appendChild(document.createTextNode(' meows'));
+        leaderboardList.appendChild(li);
+    });
 }
 
 // --- Modal logic ---
