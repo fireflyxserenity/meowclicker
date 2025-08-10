@@ -409,25 +409,26 @@ body {
     }
     
     .cat-btn {
-        width: 200px;
-        height: 200px;
+        width: 240px;
+        height: 240px;
         margin: 1rem auto;
         touch-action: manipulation;
         -webkit-tap-highlight-color: transparent;
     }
     
     .cat-img {
-        width: 170px !important;
-        height: 170px !important;
+        width: 200px !important;
+        height: 200px !important;
         object-fit: cover !important;
         object-position: center !important;
         border-radius: 50% !important;
         display: block !important;
+        background: transparent !important;
     }
     
     #catFallback {
-        width: 170px;
-        height: 170px;
+        width: 200px;
+        height: 200px;
         font-size: 1.5rem;
     }
     
@@ -505,25 +506,26 @@ body {
     }
     
     .cat-btn {
-        width: 180px;
-        height: 180px;
+        width: 220px;
+        height: 220px;
         border-width: 4px;
         touch-action: manipulation;
         -webkit-tap-highlight-color: transparent;
     }
     
     .cat-img {
-        width: 150px !important;
-        height: 150px !important;
+        width: 180px !important;
+        height: 180px !important;
         object-fit: cover !important;
         object-position: center !important;
         border-radius: 50% !important;
         display: block !important;
+        background: transparent !important;
     }
     
     #catFallback {
-        width: 150px;
-        height: 150px;
+        width: 180px;
+        height: 180px;
         font-size: 1.3rem;
     }
     
@@ -594,7 +596,7 @@ body {
     border-radius: 50%;
     filter: drop-shadow(0 0 18px #00fff7) drop-shadow(0 0 32px #ff6fff);
     transition: transform 0.1s;
-    background: #181c2b;
+    background: transparent;
     display: block;
     margin: 0 auto;
     box-shadow: 0 0 24px #00fff7, 0 0 32px #ff6fff;
