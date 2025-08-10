@@ -19,6 +19,12 @@
         </div>
     </header>
 
+    <!-- Achievement notification banner -->
+    <div id="achievementBanner" class="achievement-banner hidden">
+        <span id="bannerText"></span>
+        <button id="closeBanner">&times;</button>
+    </div>
+
 
     <section class="stats">
         <div class="stat"><span id="totalMeows">0</span><br>Total Meows</div>
@@ -79,7 +85,7 @@
             <h2>Edit Profile</h2>
             <label for="profileName">Name:</label>
             <input type="text" id="profileName" maxlength="16">
-            <h3>Choose your cat pic:</h3>
+            <h3>Choose your cat:</h3>
             <div class="cat-photos">
                 <img src="cat.png" class="cat-photo" data-cat="cat.png">
                 <img src="cat1.png" class="cat-photo" data-cat="cat1.png">
