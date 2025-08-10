@@ -479,6 +479,21 @@ body {
         max-width: calc(100vw - 2rem);
     }
     
+    #leaderboardList {
+        max-height: 300px;
+        font-size: 1rem;
+    }
+    
+    #leaderboardList li {
+        margin-bottom: 0.3rem;
+        gap: 0.4rem;
+    }
+    
+    #leaderboardList img {
+        width: 28px;
+        height: 28px;
+    }
+    
     .cat-photos {
         display: block !important;
         text-align: center !important;
@@ -603,6 +618,11 @@ body {
         height: 45px !important;
         margin: 0.15rem !important;
         display: inline-block !important;
+    }
+    
+    #leaderboardList {
+        max-height: 250px;
+        font-size: 0.9rem;
     }
 }
 
@@ -866,6 +886,30 @@ body {
     font-size: 1.1rem;
     padding-left: 0;
     margin: 0;
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 10px;
+    scrollbar-width: thin;
+    scrollbar-color: #00fff7 rgba(255, 255, 255, 0.1);
+}
+
+/* Webkit scrollbar styling */
+#leaderboardList::-webkit-scrollbar {
+    width: 8px;
+}
+
+#leaderboardList::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+#leaderboardList::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #00fff7 0%, #ff6fff 100%);
+    border-radius: 4px;
+}
+
+#leaderboardList::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #ff6fff 0%, #00fff7 100%);
 }
 #leaderboardList li {
     margin-bottom: 0.4rem;
