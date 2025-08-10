@@ -655,9 +655,9 @@ setInterval(() => {
     saveToGlobalLeaderboard();
 }, 120000);
 
-// --- Leaderboard (global) ---
-// Clean global leaderboard - starts empty for real players only
-let globalLeaderboardDemo = [];
+// --- Leaderboard (Firebase Global) ---
+// Real Firebase global leaderboard - syncs across all devices
+let globalLeaderboardData = [];
 
 // Rate limiting for API calls
 let lastGlobalSave = 0;
@@ -680,15 +680,58 @@ async function saveToGlobalLeaderboard() {
         return;
     }
     
+    // Check if Firebase is available
+    if (!window.firebase) {
+        console.log('Firebase not loaded yet, falling back to local storage');
+        saveToLocalBackup();
+        return;
+    }
+    
     try {
-        // Simulate global leaderboard update
-        console.log('Updating global leaderboard...');
+        const { database, ref, set } = window.firebase;
+        console.log('Updating Firebase global leaderboard...');
         
-        // Remove any existing entry for this player
-        globalLeaderboardDemo = globalLeaderboardDemo.filter(u => u.name !== state.profile.name);
+        // Create unique player ID from name + timestamp for collision prevention
+        const playerId = btoa(state.profile.name).replace(/[^a-zA-Z0-9]/g, '');
+        
+        // Save player data to Firebase
+        const playerData = {
+            name: state.profile.name,
+            photo: state.profile.photo,
+            meows: Math.floor(state.meowCount),
+            timestamp: Date.now(),
+            lastUpdated: Date.now()
+        };
+        
+        await set(ref(database, `leaderboard/${playerId}`), playerData);
+        
+        lastGlobalSave = now;
+        console.log('Successfully saved to Firebase global leaderboard');
+        
+        // Also save to localStorage as backup
+        saveToLocalBackup();
+        
+    } catch (error) {
+        console.log('Failed to update Firebase leaderboard:', error);
+        // Fallback to local storage
+        saveToLocalBackup();
+    }
+}
+
+function saveToLocalBackup() {
+    try {
+        // Load existing backup data
+        let backupData = [];
+        const saved = localStorage.getItem('globalLeaderboardBackup');
+        if (saved) {
+            backupData = JSON.parse(saved);
+        }
+        
+        // Remove existing entry for this player
+        backupData = backupData.filter(u => u.name !== state.profile.name);
         
         // Add current player
-        globalLeaderboardDemo.push({
+        backupData.push({
             name: state.profile.name,
             photo: state.profile.photo,
             meows: Math.floor(state.meowCount),
@@ -696,17 +739,12 @@ async function saveToGlobalLeaderboard() {
         });
         
         // Sort and keep top 50
-        globalLeaderboardDemo.sort((a, b) => b.meows - a.meows);
-        globalLeaderboardDemo = globalLeaderboardDemo.slice(0, 50);
+        backupData.sort((a, b) => b.meows - a.meows);
+        backupData = backupData.slice(0, 50);
         
-        lastGlobalSave = now;
-        console.log('Successfully saved to global leaderboard');
-        
-        // Also save to localStorage as backup
-        localStorage.setItem('globalLeaderboardDemo', JSON.stringify(globalLeaderboardDemo));
-        
+        localStorage.setItem('globalLeaderboardBackup', JSON.stringify(backupData));
     } catch (error) {
-        console.log('Failed to update global leaderboard:', error);
+        console.log('Failed to save backup data:', error);
     }
 }
 
@@ -727,28 +765,46 @@ async function renderLeaderboard() {
         return;
     }
     
+    // Check if Firebase is available
+    if (!window.firebase) {
+        console.log('Firebase not loaded yet, using backup data');
+        renderBackupLeaderboard();
+        return;
+    }
+    
     try {
-        // Load global leaderboard from localStorage if available
-        const saved = localStorage.getItem('globalLeaderboardDemo');
-        if (saved) {
-            globalLeaderboardDemo = JSON.parse(saved);
+        const { database, ref, get } = window.firebase;
+        console.log('Loading Firebase global leaderboard...');
+        
+        // Get all leaderboard data from Firebase
+        const snapshot = await get(ref(database, 'leaderboard'));
+        
+        if (snapshot.exists()) {
+            // Convert Firebase data to array
+            const firebaseData = snapshot.val();
+            globalLeaderboardData = Object.values(firebaseData);
+        } else {
+            globalLeaderboardData = [];
         }
         
         // Update player's current score in global leaderboard
         saveToGlobalLeaderboard();
         
-        let board = globalLeaderboardDemo;
+        // Sort by meows (highest first) and get top 50
+        globalLeaderboardData.sort((a, b) => b.meows - a.meows);
+        const board = globalLeaderboardData.slice(0, 50);
+        
         lastGlobalLoad = now;
         
         // Display global leaderboard
-        leaderboardList.innerHTML = '<p style="color: #00fff7; font-size: 0.9rem; margin-bottom: 1rem;">🌍 Global Leaderboard - Top 50 Players Worldwide!</p>';
+        leaderboardList.innerHTML = '<p style="color: #00fff7; font-size: 0.9rem; margin-bottom: 1rem;">🌍 Firebase Global Leaderboard - Top 50 Players Worldwide!</p>';
         
         if (board.length === 0) {
             leaderboardList.innerHTML += '<p style="color: #aaa; font-style: italic;">No global players yet - you will be the first!</p>';
             return;
         }
         
-        board.slice(0, 50).forEach((u, i) => {
+        board.forEach((u, i) => {
             const li = document.createElement('li');
             
             // Add ranking with medals/numbers
@@ -821,8 +877,90 @@ async function renderLeaderboard() {
         });
         
     } catch (error) {
-        console.log('Failed to load global leaderboard:', error.message);
-        leaderboardList.innerHTML = '<p style="color: #ff6666; font-size: 0.9rem;">⚠️ Global leaderboard temporarily unavailable</p>';
+        console.log('Failed to load Firebase leaderboard:', error.message);
+        // Fallback to backup data
+        renderBackupLeaderboard();
+    }
+}
+
+function renderBackupLeaderboard() {
+    try {
+        // Load backup data from localStorage
+        const saved = localStorage.getItem('globalLeaderboardBackup');
+        let board = [];
+        if (saved) {
+            board = JSON.parse(saved);
+        }
+        
+        // Display backup leaderboard
+        leaderboardList.innerHTML = '<p style="color: #ffa500; font-size: 0.9rem; margin-bottom: 1rem;">📱 Local Backup Leaderboard (Firebase unavailable)</p>';
+        
+        if (board.length === 0) {
+            leaderboardList.innerHTML += '<p style="color: #aaa; font-style: italic;">No backup data available</p>';
+            return;
+        }
+        
+        board.slice(0, 50).forEach((u, i) => {
+            const li = document.createElement('li');
+            
+            const rank = document.createElement('span');
+            rank.style.fontWeight = 'bold';
+            rank.style.marginRight = '0.5rem';
+            rank.style.minWidth = '2rem';
+            rank.style.display = 'inline-block';
+            rank.style.textAlign = 'center';
+            
+            if (i === 0) {
+                rank.textContent = '🥇';
+                rank.style.fontSize = '1.2rem';
+            } else if (i === 1) {
+                rank.textContent = '🥈';
+                rank.style.fontSize = '1.1rem';
+            } else if (i === 2) {
+                rank.textContent = '🥉';
+                rank.style.fontSize = '1.1rem';
+            } else {
+                rank.textContent = `${i + 1}.`;
+                rank.style.color = '#00fff7';
+                rank.style.fontSize = '0.9rem';
+            }
+            
+            const img = document.createElement('img');
+            img.alt = 'cat';
+            img.src = validatePhotoPath(u.photo);
+            img.onerror = () => { img.src = DEFAULT_CAT; };
+            
+            const name = document.createElement('b');
+            name.textContent = u.name;
+            
+            const span = document.createElement('span');
+            span.textContent = u.meows.toLocaleString();
+            
+            // Highlight current player
+            if (u.name === state.profile.name) {
+                li.style.background = 'rgba(0, 255, 255, 0.2)';
+                li.style.border = '2px solid #00fff7';
+                li.style.borderRadius = '8px';
+                li.style.padding = '0.4rem';
+                li.style.margin = '0.3rem 0';
+                li.style.boxShadow = '0 0 10px rgba(0, 255, 255, 0.3)';
+                name.style.color = '#00fff7';
+                name.textContent += ' (You)';
+            }
+            
+            li.appendChild(rank);
+            li.appendChild(img);
+            li.appendChild(document.createTextNode(' '));
+            li.appendChild(name);
+            li.appendChild(document.createTextNode(': '));
+            li.appendChild(span);
+            li.appendChild(document.createTextNode(' meows'));
+            leaderboardList.appendChild(li);
+        });
+        
+    } catch (error) {
+        console.log('Failed to render backup leaderboard:', error);
+        leaderboardList.innerHTML = '<p style="color: #ff6666; font-size: 0.9rem;">⚠️ Leaderboard temporarily unavailable</p>';
     }
 }
 
@@ -876,8 +1014,12 @@ window.onclick = function(event) {
 
 // --- Initialization ---
 loadState();
-// Clear any old demo data for a fresh start
-localStorage.removeItem('globalLeaderboardDemo');
+// Initialize Firebase connection status
+if (window.firebase) {
+    console.log('Firebase SDK loaded successfully');
+} else {
+    console.log('Firebase SDK not yet loaded, will retry when needed');
+}
 // Ensure state is properly initialized with all required fields
 if (!state.upgrades || state.upgrades.length < 8) {
     state.upgrades = [0, 0, 0, 0, 0, 0, 0, 0];
