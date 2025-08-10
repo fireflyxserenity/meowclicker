@@ -380,6 +380,8 @@ saveProfileBtn.onclick = () => {
     localStorage.setItem('catClickerLeaderboard', JSON.stringify(board));
     state.profile.name = newName;
     previousProfileName = newName;
+    // Close the modal
+    profileModal.classList.add('hidden');
     saveState();
     renderLeaderboard();
     setMainCatSrc(validatePhotoPath(state.profile.photo));
