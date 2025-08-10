@@ -257,36 +257,37 @@ if (closeBanner) {
 
 // --- Number formatting helpers ---
 function formatNumber(num) {
+    // Handle extremely large numbers that might lose precision
+    if (typeof num === 'string') {
+        num = parseFloat(num);
+    }
+    
+    // Handle special cases
+    if (!isFinite(num) || isNaN(num)) {
+        return '0';
+    }
+    
+    // Check for potential precision issues and use scientific notation for extreme numbers
+    if (num >= 1e21) { // Beyond sextillion, use scientific notation like Cookie Clicker
+        return num.toExponential(2);
+    }
+    
     // Only format numbers trillion and above, use commas for smaller numbers
     if (num < 1e12) {
         return Math.floor(num).toLocaleString();
     }
     
+    // Cookie Clicker style named units (more readable than abbreviations)
     const units = [
-        { value: 1e63, name: 'Vig' },    // vigintillion
-        { value: 1e60, name: 'Novd' },   // novemdecillion
-        { value: 1e57, name: 'Octd' },   // octodecillion
-        { value: 1e54, name: 'Septd' },  // septendecillion
-        { value: 1e51, name: 'Sexd' },   // sexdecillion
-        { value: 1e48, name: 'Quid' },   // quindecillion
-        { value: 1e45, name: 'Quat' },   // quattuordecillion
-        { value: 1e42, name: 'Tred' },   // tredecillion
-        { value: 1e39, name: 'Duod' },   // duodecillion
-        { value: 1e36, name: 'Unde' },   // undecillion
-        { value: 1e33, name: 'Dec' },    // decillion
-        { value: 1e30, name: 'Non' },    // nonillion
-        { value: 1e27, name: 'Oct' },    // octillion
-        { value: 1e24, name: 'Sept' },   // septillion
-        { value: 1e21, name: 'Sext' },   // sextillion
-        { value: 1e18, name: 'Quint' },  // quintillion
-        { value: 1e15, name: 'Quad' },   // quadrillion
-        { value: 1e12, name: 'Trill' }   // trillion
+        { value: 1e18, name: ' quintillion' },  // 1,000,000,000,000,000,000
+        { value: 1e15, name: ' quadrillion' },  // 1,000,000,000,000,000
+        { value: 1e12, name: ' trillion' }      // 1,000,000,000,000
     ];
     
     for (const unit of units) {
         if (num >= unit.value) {
             const formatted = (num / unit.value).toFixed(3);
-            // Remove unnecessary trailing zeros but keep at least 1 decimal place
+            // Remove unnecessary trailing zeros
             const cleaned = parseFloat(formatted).toString();
             return cleaned + unit.name;
         }
@@ -440,6 +441,12 @@ function renderUpgrades() {
     upgradeBtns.forEach((btn, i) => {
         const upg = upgrades[i];
         const cost = Math.floor(upg.baseCost * Math.pow(1.15, state.upgrades[i]));
+        
+        // Check for overflow/precision issues
+        if (cost > Number.MAX_SAFE_INTEGER) {
+            console.warn(`Upgrade ${i} cost exceeds safe integer limit:`, cost);
+        }
+        
         btn.innerHTML = `
             <div class="upgrade-line1">
                 <span class="upgrade-title">${upg.name}:</span>
@@ -519,6 +526,11 @@ upgradeBtns.forEach((btn, i) => {
 
 function calcMeowsPerSecond() {
     meowsPerSecond = upgrades.reduce((sum, upg, i) => sum + state.upgrades[i] * upg.mps, 0);
+    
+    // Check for potential overflow
+    if (meowsPerSecond > Number.MAX_SAFE_INTEGER) {
+        console.warn('Meows per second exceeds safe integer limit:', meowsPerSecond);
+    }
 }
 
 // --- Achievements ---
