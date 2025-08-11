@@ -145,7 +145,122 @@ const goldenPawEffects = [
     }
 ];
 
-// Prestige upgrades
+// Prestige Tree System - Cookie Clicker Style
+const prestigeTree = {
+    // Row 1 - Starting upgrades (cheap, accessible)
+    'kitten_angels': {
+        name: 'Kitten Angels',
+        desc: 'Heavenly kittens boost your production by 10% per level',
+        icon: '👼',
+        cost: 1,
+        maxLevel: 25,
+        position: { x: 2, y: 1 },
+        prerequisites: [],
+        effect: (level) => 1 + (level * 0.1),
+        unlocks: ['heavenly_chips', 'lucky_paws']
+    },
+    
+    // Row 2 - Mid-tier upgrades
+    'heavenly_chips': {
+        name: 'Heavenly Chips',
+        desc: 'Boost clicking power by 25% per level',
+        icon: '🍪',
+        cost: 3,
+        maxLevel: 20,
+        position: { x: 1, y: 2 },
+        prerequisites: ['kitten_angels'],
+        effect: (level) => 1 + (level * 0.25),
+        unlocks: ['eternal_meows', 'golden_whiskers']
+    },
+    
+    'lucky_paws': {
+        name: 'Lucky Paws',
+        desc: 'Golden Cat Paws appear 20% more often per level',
+        icon: '🐾',
+        cost: 7,
+        maxLevel: 10,
+        position: { x: 3, y: 2 },
+        prerequisites: ['kitten_angels'],
+        effect: (level) => 1 - (level * 0.2 * 0.2),
+        unlocks: ['cat_constellation', 'divine_purr']
+    },
+    
+    // Row 3 - Advanced upgrades
+    'eternal_meows': {
+        name: 'Eternal Meows',
+        desc: 'Start each prestige with bonus meows',
+        icon: '♾️',
+        cost: 10,
+        maxLevel: 5,
+        position: { x: 0, y: 3 },
+        prerequisites: ['heavenly_chips'],
+        effect: (level) => Math.pow(10, level + 2),
+        unlocks: ['cosmic_cat']
+    },
+    
+    'golden_whiskers': {
+        name: 'Golden Whiskers',
+        desc: 'All upgrades are 5% cheaper per level',
+        icon: '✨',
+        cost: 15,
+        maxLevel: 10,
+        position: { x: 1, y: 3 },
+        prerequisites: ['heavenly_chips'],
+        effect: (level) => Math.pow(0.95, level),
+        unlocks: ['cosmic_cat']
+    },
+    
+    'cat_constellation': {
+        name: 'Cat Constellation',
+        desc: 'Meows per second boost by 50% per level',
+        icon: '⭐',
+        cost: 20,
+        maxLevel: 15,
+        position: { x: 3, y: 3 },
+        prerequisites: ['lucky_paws'],
+        effect: (level) => 1 + (level * 0.5),
+        unlocks: ['transcendent_cat']
+    },
+    
+    'divine_purr': {
+        name: 'Divine Purr',
+        desc: 'Golden Cat effects last 25% longer per level',
+        icon: '🔮',
+        cost: 25,
+        maxLevel: 8,
+        position: { x: 4, y: 3 },
+        prerequisites: ['lucky_paws'],
+        effect: (level) => 1 + (level * 0.25),
+        unlocks: ['transcendent_cat']
+    },
+    
+    // Row 4 - Ultimate upgrades
+    'cosmic_cat': {
+        name: 'Cosmic Cat',
+        desc: 'Unlock the power of the universe - massive production boost',
+        icon: '🌌',
+        cost: 100,
+        maxLevel: 1,
+        position: { x: 1, y: 4 },
+        prerequisites: ['eternal_meows', 'golden_whiskers'],
+        effect: (level) => level > 0 ? 10 : 1,
+        unlocks: []
+    },
+    
+    'transcendent_cat': {
+        name: 'Transcendent Cat',
+        desc: 'Beyond mortal comprehension - all bonuses increased by 100%',
+        icon: '🌟',
+        cost: 150,
+        maxLevel: 1,
+        position: { x: 3, y: 4 },
+        prerequisites: ['cat_constellation', 'divine_purr'],
+        effect: (level) => level > 0 ? 2 : 1,
+        unlocks: []
+    }
+};
+
+// Legacy prestige upgrades for compatibility (will be removed after tree implementation)
 const prestigeUpgrades = [
     {
         id: 'kitten_angels',
@@ -754,12 +869,13 @@ function updateEffectDisplay() {
 // --- Prestige System ---
 function calculateHeavenlyTreats() {
     // Calculate how many heavenly treats the player would get
-    const totalMeows = state.prestige.totalMeowsEver + state.meowCount;
-    return Math.floor(Math.sqrt(totalMeows / 1000000)); // 1 treat per million meows (square root scaling)
+    // Use only current run meows, not cumulative across all time
+    const currentRunMeows = state.meowCount;
+    return Math.floor(Math.sqrt(currentRunMeows / 1000000)); // 1 treat per million meows (square root scaling)
 }
 
 function canPrestige() {
-    return calculateHeavenlyTreats() > state.prestige.heavenlyTreats;
+    return calculateHeavenlyTreats() > 0; // Can prestige if we'd get at least 1 treat from current run
 }
 
 // Make performPrestige globally accessible
@@ -769,20 +885,29 @@ window.performPrestige = function() {
         return;
     }
     
+    // Prevent rapid successive prestige attempts
+    if (window.prestigeCooldown && Date.now() - window.prestigeCooldown < 2000) {
+        showAchievementBanner('Please wait a moment before prestiging again.');
+        return;
+    }
+    
     // Confirm prestige
-    const newTreats = calculateHeavenlyTreats() - state.prestige.heavenlyTreats;
+    const newTreats = calculateHeavenlyTreats(); // Treats gained from this run only
     const confirmation = confirm(
         `Are you sure you want to prestige?\n\n` +
-        `You will gain ${newTreats} Heavenly Treats.\n` +
+        `You will gain ${newTreats} Heavenly Treats from this run.\n` +
         `All progress will be reset, but you'll keep your heavenly bonuses!\n\n` +
         `This will make future runs much more powerful.`
     );
     
     if (!confirmation) return;
     
+    // Set cooldown timestamp
+    window.prestigeCooldown = Date.now();
+    
     // Update prestige stats
     state.prestige.totalMeowsEver += state.meowCount;
-    state.prestige.heavenlyTreats = calculateHeavenlyTreats();
+    state.prestige.heavenlyTreats += newTreats; // Add new treats to existing total
     state.prestige.level++;
     
     // Reset game progress
@@ -813,10 +938,139 @@ window.performPrestige = function() {
     renderAchievements();
     updateEffectDisplay();
     
+    // Close the prestige modal and refresh its content for next time
+    const prestigeModal = document.getElementById('prestigeModal');
+    if (prestigeModal) {
+        prestigeModal.classList.add('hidden');
+    }
+    
     showAchievementBanner(`🌟 Prestige ${state.prestige.level}! You gained ${newTreats} Heavenly Treats! Your journey begins anew with heavenly power!`);
     
     saveStateWithGlobal();
 };
+
+// Tree helper functions
+function getTreeUpgradeLevel(upgradeId) {
+    const upgrade = state.prestige.unlockedUpgrades.find(u => u.id === upgradeId);
+    return upgrade ? upgrade.level : 0;
+}
+
+function isTreeUpgradeUnlocked(upgradeId) {
+    const upgrade = prestigeTree[upgradeId];
+    if (!upgrade) return false;
+    
+    // Check if all prerequisites are met
+    return upgrade.prerequisites.every(prereqId => {
+        return getTreeUpgradeLevel(prereqId) > 0;
+    });
+}
+
+function canBuyTreeUpgrade(upgradeId) {
+    const upgrade = prestigeTree[upgradeId];
+    if (!upgrade) return false;
+    
+    const currentLevel = getTreeUpgradeLevel(upgradeId);
+    if (currentLevel >= upgrade.maxLevel) return false;
+    
+    // Check prerequisites
+    if (!isTreeUpgradeUnlocked(upgradeId)) return false;
+    
+    // Check cost (cost increases per level: baseCost * (level + 1))
+    const cost = upgrade.cost * (currentLevel + 1);
+    return state.prestige.heavenlyTreats >= cost;
+}
+
+function buyTreeUpgrade(upgradeId) {
+    if (!canBuyTreeUpgrade(upgradeId)) return false;
+    
+    const upgrade = prestigeTree[upgradeId];
+    const currentLevel = getTreeUpgradeLevel(upgradeId);
+    const cost = upgrade.cost * (currentLevel + 1);
+    
+    state.prestige.heavenlyTreats -= cost;
+    
+    // Update or add upgrade
+    const existingUpgrade = state.prestige.unlockedUpgrades.find(u => u.id === upgradeId);
+    if (existingUpgrade) {
+        existingUpgrade.level++;
+    } else {
+        state.prestige.unlockedUpgrades.push({ id: upgradeId, level: 1 });
+    }
+    
+    // Mobile haptic feedback
+    if (navigator.vibrate) {
+        navigator.vibrate(50); // Short vibration for purchase
+    }
+    
+    showAchievementBanner(`✨ Purchased ${upgrade.name} level ${currentLevel + 1}!`);
+    
+    // Update displays
+    updateStats();
+    renderUpgrades();
+    renderPrestigeModal();
+    saveStateWithGlobal();
+    
+    return true;
+}
+
+// Make tree functions globally accessible
+window.buyTreeUpgrade = buyTreeUpgrade;
+
+// Enhanced modal management with swipe support
+function setupModalTouchHandlers() {
+    const modals = document.querySelectorAll('.modal');
+    
+    modals.forEach(modal => {
+        let startY = 0;
+        let currentY = 0;
+        let isDragging = false;
+        
+        const modalContent = modal.querySelector('.modal-content');
+        if (!modalContent) return;
+        
+        modalContent.addEventListener('touchstart', (e) => {
+            startY = e.touches[0].clientY;
+            isDragging = true;
+        }, { passive: true });
+        
+        modalContent.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            
+            currentY = e.touches[0].clientY;
+            const diffY = currentY - startY;
+            
+            // Only allow closing with downward swipe from top of modal
+            if (diffY > 0 && modalContent.scrollTop === 0) {
+                const opacity = Math.max(0.3, 1 - (diffY / 200));
+                modal.style.background = `rgba(0, 0, 0, ${opacity * 0.8})`;
+                
+                if (diffY > 100) {
+                    // Add visual feedback for close threshold
+                    modalContent.style.transform = `translateY(${Math.min(diffY, 150)}px)`;
+                }
+            }
+        }, { passive: true });
+        
+        modalContent.addEventListener('touchend', (e) => {
+            if (!isDragging) return;
+            isDragging = false;
+            
+            const diffY = currentY - startY;
+            
+            if (diffY > 100 && modalContent.scrollTop === 0) {
+                // Close modal with swipe
+                modal.classList.add('hidden');
+                if (navigator.vibrate) {
+                    navigator.vibrate(30); // Light haptic feedback
+                }
+            }
+            
+            // Reset styles
+            modal.style.background = '';
+            modalContent.style.transform = '';
+        }, { passive: true });
+    });
+}
 
 function getPrestigeUpgradeLevel(upgradeId) {
     const upgrade = state.prestige.unlockedUpgrades.find(u => u.id === upgradeId);
@@ -864,9 +1118,9 @@ function buyPrestigeUpgrade(upgradeId) {
     updateStats();
     renderUpgrades();
     
-    // Only update the shop portion, not recalculate prestige eligibility
+    // Refresh prestige modal if it's open
     setTimeout(() => {
-        updatePrestigeDisplay();
+        renderPrestigeModal();
     }, 50);
     
     saveStateWithGlobal();
@@ -876,6 +1130,21 @@ function buyPrestigeUpgrade(upgradeId) {
 window.buyPrestigeUpgrade = buyPrestigeUpgrade;
 
 function applyPrestigeBonus(upgradeId) {
+    // Use tree system first, fallback to legacy system
+    const treeLevel = getTreeUpgradeLevel(upgradeId);
+    if (treeLevel > 0 && prestigeTree[upgradeId]) {
+        const upgrade = prestigeTree[upgradeId];
+        const bonus = upgrade.effect(treeLevel);
+        
+        // Apply specific bonuses
+        if (upgradeId === 'eternal_meows') {
+            state.meowCount += bonus;
+        }
+        
+        return bonus;
+    }
+    
+    // Legacy system fallback
     const level = getPrestigeUpgradeLevel(upgradeId);
     if (level === 0) return 1;
     
@@ -893,15 +1162,296 @@ function applyPrestigeBonus(upgradeId) {
 }
 
 function getTotalPrestigeMultiplier() {
+    // Calculate bonuses from tree system
     const kittenAngels = applyPrestigeBonus('kitten_angels');
     const heavenlyChips = applyPrestigeBonus('heavenly_chips');
-    return { production: kittenAngels, clicking: heavenlyChips };
+    const catConstellation = applyPrestigeBonus('cat_constellation');
+    const cosmicCat = applyPrestigeBonus('cosmic_cat');
+    const transcendentCat = applyPrestigeBonus('transcendent_cat');
+    
+    const productionMultiplier = kittenAngels * catConstellation * cosmicCat * transcendentCat;
+    const clickingMultiplier = heavenlyChips * cosmicCat * transcendentCat;
+    
+    return { production: productionMultiplier, clicking: clickingMultiplier };
 }
 
-function renderPrestigeShop() {
-    // This will be called to update the prestige shop UI
-    // For now, we'll add it to the profile modal
+function renderPrestigeTree() {
+    const heavenlyTreats = state.prestige.heavenlyTreats;
+    
+    let treeHTML = `
+        <div class="prestige-tree-mobile" style="
+            max-height: 350px;
+            overflow-y: auto;
+            padding: 0 0.5rem;
+            position: relative;
+        ">
+        
+        <!-- Mobile scroll indicator -->
+        <div style="
+            position: sticky;
+            top: 0;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            z-index: 10;
+            padding: 0.5rem 0;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #aaa;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        ">
+            📱 Scroll to explore all upgrade tiers
+        </div>
+    `;
+    
+    // Group upgrades by tiers for better organization
+    const tiers = [
+        {
+            name: "🌟 Foundation Tier",
+            upgrades: ['kitten_angels'],
+            description: "Essential starting upgrades"
+        },
+        {
+            name: "⚡ Enhancement Tier", 
+            upgrades: ['heavenly_chips', 'lucky_paws'],
+            description: "Boost your power"
+        },
+        {
+            name: "🚀 Advanced Tier",
+            upgrades: ['eternal_meows', 'golden_whiskers', 'cat_constellation', 'divine_purr'],
+            description: "Powerful late-game bonuses"
+        },
+        {
+            name: "🌌 Transcendent Tier",
+            upgrades: ['cosmic_cat', 'transcendent_cat'],
+            description: "Ultimate power"
+        }
+    ];
+    
+    tiers.forEach(tier => {
+        // Check if any upgrade in this tier is unlocked
+        const tierUnlocked = tier.upgrades.some(upgradeId => isTreeUpgradeUnlocked(upgradeId));
+        const tierOwned = tier.upgrades.some(upgradeId => getTreeUpgradeLevel(upgradeId) > 0);
+        
+        if (!tierUnlocked && tier.name !== "🌟 Foundation Tier") {
+            // Show locked tier
+            treeHTML += `
+                <div class="tier-section locked" style="
+                    margin-bottom: 1rem;
+                    padding: 1rem;
+                    border: 2px solid #444;
+                    border-radius: 10px;
+                    background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+                    opacity: 0.6;
+                ">
+                    <div style="text-align: center; color: #666; font-weight: bold; margin-bottom: 0.5rem;">
+                        ${tier.name} 🔒
+                    </div>
+                    <div style="text-align: center; color: #888; font-size: 0.8rem; font-style: italic;">
+                        ${tier.description}
+                    </div>
+                </div>
+            `;
+            return;
+        }
+        
+        // Show unlocked tier header
+        treeHTML += `
+            <div class="tier-section" style="
+                margin-bottom: 1rem;
+                padding: 1rem;
+                border: 2px solid ${tierOwned ? '#ffd700' : '#00fff7'};
+                border-radius: 10px;
+                background: linear-gradient(135deg, #1a1a2e, #16213e);
+                box-shadow: 0 0 10px ${tierOwned ? 'rgba(255, 215, 0, 0.3)' : 'rgba(0, 255, 255, 0.3)'};
+            ">
+                <div style="text-align: center; color: ${tierOwned ? '#ffd700' : '#00fff7'}; font-weight: bold; margin-bottom: 0.5rem;">
+                    ${tier.name}
+                </div>
+                <div style="text-align: center; color: #aaa; font-size: 0.8rem; margin-bottom: 1rem; font-style: italic;">
+                    ${tier.description}
+                </div>
+                
+                <div class="tier-upgrades" style="display: grid; gap: 0.8rem;">
+        `;
+        
+        // Render upgrades in this tier
+        tier.upgrades.forEach(upgradeId => {
+            const upgrade = prestigeTree[upgradeId];
+            if (!upgrade) return;
+            
+            const currentLevel = getTreeUpgradeLevel(upgradeId);
+            const isUnlocked = isTreeUpgradeUnlocked(upgradeId);
+            const canBuy = canBuyTreeUpgrade(upgradeId);
+            const cost = upgrade.cost * (currentLevel + 1);
+            const maxedOut = currentLevel >= upgrade.maxLevel;
+            
+            let cardClass = '';
+            let cardStyle = '';
+            let statusText = '';
+            let statusColor = '#aaa';
+            
+            if (maxedOut) {
+                cardClass = 'maxed';
+                cardStyle = 'border-left: 4px solid #90EE90; background: linear-gradient(135deg, #1a3a1a, #2a4a2a);';
+                statusText = 'MAX LEVEL ✓';
+                statusColor = '#90EE90';
+            } else if (currentLevel > 0) {
+                cardClass = 'owned';
+                cardStyle = 'border-left: 4px solid #ffd700; background: linear-gradient(135deg, #3a2a1a, #4a3a2a);';
+                statusText = `Level ${currentLevel}/${upgrade.maxLevel} - Upgrade for ${cost} treats`;
+                statusColor = '#ffd700';
+            } else if (canBuy) {
+                cardClass = 'available';
+                cardStyle = 'border-left: 4px solid #00fff7; background: linear-gradient(135deg, #1a2a3a, #2a3a4a);';
+                statusText = `Buy for ${cost} treats`;
+                statusColor = '#00fff7';
+            } else if (isUnlocked) {
+                cardClass = 'unlocked-expensive';
+                cardStyle = 'border-left: 4px solid #ff6b6b; background: linear-gradient(135deg, #2a1a1a, #3a2a2a);';
+                statusText = `Need ${cost} treats`;
+                statusColor = '#ff6b6b';
+            } else {
+                cardClass = 'locked';
+                cardStyle = 'border-left: 4px solid #666; background: linear-gradient(135deg, #1a1a1a, #2a2a2a);';
+                const missingPrereqs = upgrade.prerequisites.filter(prereqId => getTreeUpgradeLevel(prereqId) === 0);
+                statusText = `Requires: ${missingPrereqs.map(id => prestigeTree[id].name).join(', ')}`;
+                statusColor = '#666';
+            }
+            
+            treeHTML += `
+                <div class="prestige-card ${cardClass}" 
+                     onclick="${canBuy ? `buyTreeUpgrade('${upgradeId}')` : ''}"
+                     style="
+                         ${cardStyle}
+                         padding: 1rem;
+                         border-radius: 8px;
+                         cursor: ${canBuy ? 'pointer' : 'default'};
+                         transition: all 0.3s ease;
+                         position: relative;
+                         ${canBuy ? 'box-shadow: 0 2px 10px rgba(0, 255, 255, 0.3);' : ''}
+                     ">
+                    
+                    <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
+                        <div style="
+                            font-size: 2rem; 
+                            margin-right: 1rem;
+                            min-width: 3rem;
+                            text-align: center;
+                            ${currentLevel > 0 ? 'filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.6));' : ''}
+                        ">
+                            ${upgrade.icon}
+                        </div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: bold; color: #fff; font-size: 1rem; margin-bottom: 0.2rem;">
+                                ${upgrade.name}
+                                ${currentLevel > 0 ? `<span style="color: ${statusColor}; font-size: 0.8rem; margin-left: 0.5rem;">Lv.${currentLevel}</span>` : ''}
+                            </div>
+                            <div style="color: #ccc; font-size: 0.8rem; line-height: 1.3;">
+                                ${upgrade.desc}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="
+                        color: ${statusColor}; 
+                        font-size: 0.8rem; 
+                        font-weight: bold;
+                        text-align: center;
+                        padding: 0.3rem;
+                        background: rgba(0, 0, 0, 0.3);
+                        border-radius: 4px;
+                    ">
+                        ${statusText}
+                    </div>
+                    
+                    ${canBuy ? `
+                        <div style="
+                            position: absolute;
+                            top: 0.5rem;
+                            right: 0.5rem;
+                            background: rgba(0, 255, 255, 0.2);
+                            color: #00fff7;
+                            padding: 0.2rem 0.5rem;
+                            border-radius: 12px;
+                            font-size: 0.7rem;
+                            font-weight: bold;
+                        ">
+                            READY
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        });
+        
+        treeHTML += '</div></div>'; // Close tier-upgrades and tier-section
+    });
+    
+    treeHTML += '</div>'; // Close prestige-tree-mobile
+    
+    return treeHTML;
 }
+
+// Tree tooltip functions
+function showTreeTooltip(event, upgradeId) {
+    const tooltip = document.getElementById('prestigeTooltip');
+    const upgrade = prestigeTree[upgradeId];
+    if (!tooltip || !upgrade) return;
+    
+    const currentLevel = getTreeUpgradeLevel(upgradeId);
+    const isUnlocked = isTreeUpgradeUnlocked(upgradeId);
+    const canBuy = canBuyTreeUpgrade(upgradeId);
+    const cost = upgrade.cost * (currentLevel + 1);
+    const maxedOut = currentLevel >= upgrade.maxLevel;
+    
+    let statusText = '';
+    let statusColor = '#aaa';
+    
+    if (maxedOut) {
+        statusText = 'MAX LEVEL';
+        statusColor = '#90EE90';
+    } else if (canBuy) {
+        statusText = `Click to buy for ${cost} treats`;
+        statusColor = '#00fff7';
+    } else if (isUnlocked) {
+        statusText = `Need ${cost} treats`;
+        statusColor = '#ff6b6b';
+    } else {
+        const missingPrereqs = upgrade.prerequisites.filter(prereqId => getTreeUpgradeLevel(prereqId) === 0);
+        statusText = `Requires: ${missingPrereqs.map(id => prestigeTree[id].name).join(', ')}`;
+        statusColor = '#666';
+    }
+    
+    tooltip.innerHTML = `
+        <div style="font-weight: bold; color: #ffd700; margin-bottom: 0.3rem;">
+            ${upgrade.icon} ${upgrade.name}
+        </div>
+        <div style="margin-bottom: 0.3rem; line-height: 1.3;">
+            ${upgrade.desc}
+        </div>
+        <div style="font-size: 0.7rem; margin-bottom: 0.3rem;">
+            Level: ${currentLevel}/${upgrade.maxLevel}
+        </div>
+        <div style="font-size: 0.7rem; color: ${statusColor}; font-weight: bold;">
+            ${statusText}
+        </div>
+    `;
+    
+    tooltip.style.display = 'block';
+    tooltip.style.left = (event.pageX + 10) + 'px';
+    tooltip.style.top = (event.pageY - 10) + 'px';
+}
+
+function hideTreeTooltip() {
+    const tooltip = document.getElementById('prestigeTooltip');
+    if (tooltip) {
+        tooltip.style.display = 'none';
+    }
+}
+
+// Make tooltip functions globally accessible
+window.showTreeTooltip = showTreeTooltip;
+window.hideTreeTooltip = hideTreeTooltip;
 
 // --- Image helpers & fallbacks ---
 const DEFAULT_CAT = 'cat.png';
@@ -1050,13 +1600,36 @@ function applyOfflineProgress() {
     const now = Date.now();
     const elapsed = (now - (state.lastActive || now)) / 1000; // seconds
     calcMeowsPerSecond();
-    if (elapsed > 2) {
-        const offlineMeows = meowsPerSecond * elapsed;
+    
+    // Only give offline progress if away for more than 30 seconds
+    if (elapsed > 30) {
+        // Cap offline time at 2 hours (7200 seconds) for balance
+        const cappedElapsed = Math.min(elapsed, 7200);
+        
+        // Apply significant offline penalty - only 15% efficiency while away
+        const offlineEfficiency = 0.15;
+        const offlineMeows = meowsPerSecond * cappedElapsed * offlineEfficiency;
+        
         state.meowCount += offlineMeows;
+        
+        // Format time away message
+        const timeAway = formatTime(elapsed);
+        const efficiencyNote = elapsed > 7200 ? " (capped at 2 hours)" : "";
+        
         setTimeout(() => {
-            showAchievementBanner(`Welcome back! While you were away, your cats collected ${formatNumber(offlineMeows)} meows!`);
+            showAchievementBanner(`Welcome back! You were away for ${timeAway}. Your cats lazily collected ${formatNumber(offlineMeows)} meows at 15% efficiency${efficiencyNote}.`);
         }, 500);
     }
+}
+
+// Helper function to format time for offline message
+function formatTime(seconds) {
+    if (seconds < 60) return `${Math.floor(seconds)} seconds`;
+    if (seconds < 3600) return `${Math.floor(seconds / 60)} minutes`;
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    if (minutes === 0) return `${hours} hour${hours > 1 ? 's' : ''}`;
+    return `${hours} hour${hours > 1 ? 's' : ''} and ${minutes} minute${minutes > 1 ? 's' : ''}`;
 }
 
 // --- Profile ---
@@ -1536,9 +2109,6 @@ function renderAchievements() {
         }
     });
     
-    // Update prestige display after achievements
-    updatePrestigeDisplay();
-    
     // Update achievement notification badge
     updateAchievementNotification();
 }
@@ -1655,28 +2225,34 @@ function renderAchievementsModal() {
 function renderPrestigeModal() {
     if (!prestigeContent) return;
     
+    // Clear any existing content first to prevent duplicates
+    prestigeContent.innerHTML = '';
+    
     const heavenlyTreats = state.prestige.heavenlyTreats;
-    const availableTreats = calculateHeavenlyTreats();
+    const availableTreats = calculateHeavenlyTreats(); // Treats from current run
     const canPrestigeNow = canPrestige();
     
     let content = `
-        <div style="text-align: center; margin-bottom: 1.5rem;">
-            <div style="font-size: 1.2rem; font-weight: bold; color: #ffd700; margin-bottom: 0.5rem;">
+        <div style="text-align: center; margin-bottom: 1rem;">
+            <div style="font-size: 1.1rem; font-weight: bold; color: #ffd700; margin-bottom: 0.3rem;">
                 ✨ Prestige Level: ${state.prestige.level} ✨
             </div>
-            <div style="font-size: 1rem; color: #fff; margin-bottom: 0.5rem;">
+            <div style="font-size: 0.9rem; color: #fff; margin-bottom: 0.3rem;">
                 💫 Heavenly Treats: ${heavenlyTreats} 💫
             </div>
-            <div style="font-size: 0.9rem; color: #aaa; font-style: italic;">
+            <div style="font-size: 0.8rem; color: #aaa; margin-bottom: 0.3rem;">
+                This Run: ${formatNumber(state.meowCount)} meows | Available: ${availableTreats} treats
+            </div>
+            <div style="font-size: 0.75rem; color: #aaa; font-style: italic;">
                 Heavenly Treats unlock permanent bonuses for all future runs!
             </div>
         </div>
     `;
     
     if (canPrestigeNow) {
-        const newTreats = availableTreats - heavenlyTreats;
+        const newTreats = availableTreats; // Treats from this run
         content += `
-            <div style="text-align: center; margin-bottom: 1.5rem;">
+            <div style="text-align: center; margin-bottom: 1rem;">
                 <button onclick="performPrestige()" style="
                     background: linear-gradient(45deg, #ffd700, #ffed4e, #ffa500); 
                     border: 2px solid #fff;
@@ -1686,6 +2262,11 @@ function renderPrestigeModal() {
                     font-weight: bold; 
                     color: #8b4513;
                     font-size: 1.1rem;
+                    min-height: 50px;
+                    width: 100%;
+                    max-width: 300px;
+                    touch-action: manipulation;
+                    -webkit-tap-highlight-color: transparent;
                     box-shadow: 0 4px 15px rgba(255, 215, 0, 0.6);
                     transition: all 0.2s ease;
                     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
@@ -1695,50 +2276,34 @@ function renderPrestigeModal() {
             </div>
         `;
     } else {
+        // Calculate what we need for the next heavenly treat from current run only
+        const currentRunMeows = state.meowCount;
+        const needed = 1000000; // Need 1 million meows this run for first treat
+        const remaining = Math.max(0, needed - currentRunMeows);
+        
         content += `
-            <div style="text-align: center; margin-bottom: 1.5rem; color: #aaa;">
-                Reach 1 billion total meows to unlock prestige!
+            <div style="text-align: center; margin-bottom: 1rem; color: #aaa;">
+                <div style="margin-bottom: 0.3rem; font-size: 0.9rem;">Need more meows this run to prestige!</div>
+                <div style="font-size: 0.8rem;">
+                    This run: ${formatNumber(currentRunMeows)} | Need: ${formatNumber(needed)}<br>
+                    <span style="color: #ff6b6b;">Missing: ${formatNumber(remaining)} meows</span>
+                </div>
+                <div style="font-size: 0.7rem; margin-top: 0.3rem; font-style: italic;">
+                    (Each prestige counts only meows from the current run)
+                </div>
             </div>
         `;
     }
     
-    // Show prestige upgrades if player has any treats or has prestiged
+    // Show prestige tree
     if (state.prestige.level > 0 || heavenlyTreats > 0) {
+        content += renderPrestigeTree();
+    } else {
         content += `
-            <div style="margin-top: 1.5rem;">
-                <h3 style="color: #ffd700; text-align: center; margin-bottom: 1rem;">🏪 Heavenly Treats Shop 🏪</h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+            <div style="text-align: center; margin-top: 1rem; color: #aaa; font-style: italic;">
+                Complete your first prestige to unlock the Heavenly Tree!
+            </div>
         `;
-        
-        // Add prestige upgrade buttons (simplified version)
-        prestigeUpgrades.forEach(upgrade => {
-            const currentLevel = getPrestigeUpgradeLevel(upgrade.id);
-            const cost = getPrestigeUpgradeCost(upgrade.id, currentLevel);
-            const canBuy = canBuyPrestigeUpgrade(upgrade.id);
-            const maxedOut = currentLevel >= upgrade.maxLevel;
-            
-            content += `
-                <button onclick="buyPrestigeUpgrade('${upgrade.id}')" 
-                        style="background: linear-gradient(45deg, #4a0e4e, #2d1b69); 
-                               border: 2px solid ${canBuy && !maxedOut ? '#ffd700' : '#666'}; 
-                               color: ${canBuy && !maxedOut ? '#ffd700' : '#aaa'};
-                               padding: 1rem; border-radius: 8px; cursor: ${canBuy && !maxedOut ? 'pointer' : 'not-allowed'};
-                               font-size: 0.9rem; text-align: left;"
-                        ${!canBuy || maxedOut ? 'disabled' : ''}>
-                    <div style="font-weight: bold; margin-bottom: 0.3rem;">
-                        ${upgrade.name} ${currentLevel > 0 ? `(Lv.${currentLevel})` : ''}
-                    </div>
-                    <div style="font-size: 0.8rem; opacity: 0.8; margin-bottom: 0.3rem;">
-                        ${upgrade.desc}
-                    </div>
-                    <div style="font-size: 0.8rem;">
-                        ${maxedOut ? 'MAX LEVEL' : `Cost: ${cost} treats`}
-                    </div>
-                </button>
-            `;
-        });
-        
-        content += '</div></div>';
     }
     
     prestigeContent.innerHTML = content;
@@ -1874,137 +2439,8 @@ function updatePrestigeDisplay() {
         }
     }
     
-    const heavenlyTreats = state.prestige.heavenlyTreats;
-    const availableTreats = calculateHeavenlyTreats();
-    const canPrestigeNow = canPrestige();
-    
-    // Only show if player has prestige level or can prestige
-    if (state.prestige.level > 0 || canPrestigeNow) {
-        // Create prestige toggle button if it doesn't exist
-        let prestigeToggleBtn = document.getElementById('prestigeToggleBtn');
-        if (!prestigeToggleBtn) {
-            prestigeToggleBtn = document.createElement('button');
-            prestigeToggleBtn.id = 'prestigeToggleBtn';
-            prestigeToggleBtn.innerHTML = '✨ Prestige Menu ✨';
-            prestigeToggleBtn.style.cssText = `
-                margin-top: 1rem;
-                padding: 0.8rem 1.5rem;
-                background: linear-gradient(45deg, #2d1b69, #4b0082, #ffd700, #ffa500);
-                background-size: 300% 300%;
-                animation: prestigeGlow 12s ease-in-out infinite alternate;
-                border: 3px solid #ffd700;
-                border-radius: 12px;
-                color: #ffffff;
-                font-weight: bold;
-                font-size: 1rem;
-                cursor: pointer;
-                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
-                box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
-                transition: all 0.2s ease;
-                display: block;
-                width: 100%;
-                position: relative;
-                overflow: hidden;
-            `;
-            
-            // Add hover effects
-            prestigeToggleBtn.onmouseover = () => {
-                prestigeToggleBtn.style.transform = 'scale(1.05)';
-                prestigeToggleBtn.style.boxShadow = '0 0 25px rgba(255, 215, 0, 0.8)';
-            };
-            prestigeToggleBtn.onmouseout = () => {
-                prestigeToggleBtn.style.transform = 'scale(1)';
-                prestigeToggleBtn.style.boxShadow = '0 0 15px rgba(255, 215, 0, 0.5)';
-            };
-            
-            // Toggle functionality
-            prestigeToggleBtn.onclick = () => {
-                const isVisible = prestigeInfo.style.display !== 'none';
-                prestigeInfo.style.display = isVisible ? 'none' : 'block';
-                prestigeToggleBtn.innerHTML = isVisible ? '✨ Prestige Menu ✨' : '✨ Hide Prestige ✨';
-            };
-            
-            // Insert button in the cat clicker section
-            if (catClickerSection) {
-                catClickerSection.appendChild(prestigeToggleBtn);
-            }
-        }
-        
-        // Hide prestige info by default
-        prestigeInfo.style.display = 'none';
-        
-        // Generate prestige shop items
-        let shopHTML = '';
-        if (heavenlyTreats > 0) {
-            shopHTML = `
-                <div style="margin-top: 1rem; border-top: 2px solid #ffd700; padding-top: 1rem;">
-                    <div style="font-weight: bold; margin-bottom: 0.5rem; color: #ffd700;">🏪 Heavenly Shop</div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.3rem; text-align: left;">
-            `;
-            
-            prestigeUpgrades.forEach(upgrade => {
-                const currentLevel = getPrestigeUpgradeLevel(upgrade.id);
-                const cost = getPrestigeUpgradeCost(upgrade.id, currentLevel);
-                const canBuy = canBuyPrestigeUpgrade(upgrade.id);
-                const maxedOut = currentLevel >= upgrade.maxLevel;
-                
-                shopHTML += `
-                    <button class="prestige-upgrade-btn" 
-                            onclick="buyPrestigeUpgrade('${upgrade.id}')" 
-                            ${!canBuy || maxedOut ? 'disabled' : ''}>
-                        <div style="font-size: 0.7rem; font-weight: bold; color: #fff;">
-                            ${upgrade.name} ${currentLevel > 0 ? `(Lv.${currentLevel})` : ''}
-                        </div>
-                        <div style="font-size: 0.6rem; opacity: 0.8; margin: 0.2rem 0;">
-                            ${upgrade.desc}
-                        </div>
-                        <div style="font-size: 0.6rem; color: ${canBuy && !maxedOut ? '#ffd700' : '#999'};">
-                            ${maxedOut ? 'MAX LEVEL' : `Cost: ${cost} treats`}
-                        </div>
-                    </button>
-                `;
-            });
-            
-            shopHTML += '</div></div>';
-        }
-        
-        prestigeInfo.innerHTML = `
-            <div style="font-weight: bold; margin-bottom: 0.5rem; font-size: 1.1rem; text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8);">
-                ✨ Prestige Level: ${state.prestige.level} | Heavenly Treats: ${heavenlyTreats} ✨
-            </div>
-            <div style="font-size: 0.8rem; opacity: 0.9; margin-bottom: 0.5rem; font-style: italic;">
-                💫 Heavenly Treats unlock permanent bonuses for all future runs! 💫
-            </div>
-            ${canPrestigeNow ? 
-                `<button onclick="performPrestige()" style="
-                    background: linear-gradient(45deg, #ffd700, #ffed4e, #ffa500); 
-                    border: 2px solid #fff;
-                    padding: 0.8rem 1.5rem; 
-                    border-radius: 12px; 
-                    cursor: pointer; 
-                    font-weight: bold; 
-                    color: #8b4513;
-                    font-size: 1.1rem;
-                    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.6);
-                    transition: all 0.2s ease;
-                    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
-                " onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 6px 20px rgba(255, 215, 0, 0.8)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 4px 15px rgba(255, 215, 0, 0.6)'">
-                    🌟 Ascend to Prestige ${state.prestige.level + 1} (+${availableTreats - heavenlyTreats} treats) 🌟
-                </button>` : 
-                `<div style="opacity: 0.8; font-style: italic; margin-top: 0.5rem; font-size: 0.9rem;">
-                    🌙 Next prestige: ${formatNumber(Math.pow((availableTreats + 1), 2) * 1000000)} total meows needed 🌙
-                </div>`
-            }
-            ${shopHTML}
-        `;
-    } else {
-        // Hide both button and info if prestige not available
-        const prestigeToggleBtn = document.getElementById('prestigeToggleBtn');
-        if (prestigeToggleBtn) {
-            prestigeToggleBtn.style.display = 'none';
-        }
-        prestigeInfo.style.display = 'none';
-    }
+    // OLD PRESTIGE SYSTEM REMOVED - Now using header button + modal
+    // The prestige functionality is handled by the header button and modal system
 }
 
 // Optimized cat button handler for rapid clicking
@@ -2243,7 +2679,7 @@ async function renderLeaderboard() {
         lastGlobalLoad = now;
         
         // Display global leaderboard
-        leaderboardList.innerHTML = '<p style="color: #00fff7; font-size: 0.9rem; margin-bottom: 1rem;">🌍 Firebase Global Leaderboard - Top 50 Players Worldwide!</p>';
+        leaderboardList.innerHTML = '';
         
         if (board.length === 0) {
             leaderboardList.innerHTML += '<p style="color: #aaa; font-style: italic;">No global players yet - you will be the first!</p>';
@@ -2494,7 +2930,13 @@ if (prestigeBtn && prestigeModal && closePrestige) {
         renderPrestigeModal(); // Refresh the prestige content
         prestigeModal.classList.remove('hidden');
     };
-    closePrestige.onclick = () => prestigeModal.classList.add('hidden');
+    closePrestige.onclick = () => {
+        prestigeModal.classList.add('hidden');
+        // Clear the content to force refresh next time
+        if (prestigeContent) {
+            prestigeContent.innerHTML = '';
+        }
+    };
 }
 window.onclick = function(event) {
     if (profileModal && event.target === profileModal) profileModal.classList.add('hidden');
@@ -2594,3 +3036,6 @@ document.body.appendChild(footer);
 
 // Apply Twemoji to the entire document for initial load
 applyTwemoji(document.body);
+
+// Initialize mobile touch handlers
+setupModalTouchHandlers();
