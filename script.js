@@ -72,7 +72,11 @@ let state = {
         tenUpgrades: { unlocked: false, activated: false },
         hundredThousandMeows: { unlocked: false, activated: false },
         millionMeows: { unlocked: false, activated: false },
-        fiftyUpgrades: { unlocked: false, activated: false }
+        fiftyUpgrades: { unlocked: false, activated: false },
+        unemployed: { unlocked: false, activated: false },
+        hiss: { unlocked: false, activated: false },
+        iBelieveInYou: { unlocked: false, activated: false },
+        realMeowster: { unlocked: false, activated: false }
     },
     profile: {
         name: 'Cat Lover',
@@ -383,16 +387,47 @@ const achievements = {
         check: () => state.meowCount >= 25000000
     },
     millionMeows: {
-        name: 'Meow Millionaire',
+        name: 'Meow Billionaire',
         desc: 'Reach 1,000,000,000 total meows',
         reward: 500,
         check: () => state.meowCount >= 1000000000
     },
     fiftyUpgrades: {
         name: 'Upgrade Legend',
-        desc: 'Own 200 total upgrades',
+        desc: 'Own 100 total upgrades',
         reward: 250,
-        check: () => state.upgrades.reduce((sum, count) => sum + count, 0) >= 200
+        check: () => state.upgrades.reduce((sum, count) => sum + count, 0) >= 100
+    },
+    unemployed: {
+        name: 'Unemployed',
+        desc: 'Get 100 of every building',
+        reward: 1000,
+        check: () => state.upgrades.every(count => count >= 100)
+    },
+    hiss: {
+        name: 'Hiss',
+        desc: 'Get to 10,000 meows without clicking the cat',
+        reward: 150,
+        check: () => state.meowCount >= 10000 && state.totalClicks === 0
+    },
+    iBelieveInYou: {
+        name: 'I Believe in You',
+        desc: 'Get to 10,000 meows with only one building',
+        reward: 200,
+        check: () => {
+            const totalBuildings = state.upgrades.reduce((sum, count) => sum + count, 0);
+            return state.meowCount >= 10000 && totalBuildings === 1;
+        }
+    },
+    realMeowster: {
+        name: "Now That's a Real Meowster",
+        desc: 'Get to top 100 on leaderboards',
+        reward: 300,
+        check: () => {
+            // This will need to be checked when leaderboard data is available
+            // For now, return false - implement when leaderboard ranking is available
+            return false;
+        }
     }
 };
 
@@ -413,37 +448,39 @@ const upgradeBtns = [
     document.getElementById('catUniversity'),
     document.getElementById('interdimensionalCatPortal')
 ];
-const achievementBtns = {
-    firstMeow: document.getElementById('firstMeow'),
-    hundredMeows: document.getElementById('hundredMeows'),
-    firstUpgrade: document.getElementById('firstUpgrade'),
-    thousandMeows: document.getElementById('thousandMeows'),
-    tenUpgrades: document.getElementById('tenUpgrades'),
-    hundredThousandMeows: document.getElementById('hundredThousandMeows'),
-    millionMeows: document.getElementById('millionMeows'),
-    fiftyUpgrades: document.getElementById('fiftyUpgrades')
-};
 const profileBtn = document.getElementById('profileBtn');
 const leaderboardBtn = document.getElementById('leaderboardBtn');
+const achievementsBtn = document.getElementById('achievementsBtn');
+const kittenLabBtn = document.getElementById('kittenLabBtn');
+const prestigeBtn = document.getElementById('prestigeBtn');
 const profileModal = document.getElementById('profileModal');
 const leaderboardModal = document.getElementById('leaderboardModal');
+const achievementsModal = document.getElementById('achievementsModal');
+const kittenLabModal = document.getElementById('kittenLabModal');
+const prestigeModal = document.getElementById('prestigeModal');
 const achievementBanner = document.getElementById('achievementBanner');
 const bannerText = document.getElementById('bannerText');
 const closeBanner = document.getElementById('closeBanner');
 const closeProfile = document.getElementById('closeProfile');
 const closeLeaderboard = document.getElementById('closeLeaderboard');
+const closeAchievements = document.getElementById('closeAchievements');
+const closeKittenLab = document.getElementById('closeKittenLab');
+const closePrestige = document.getElementById('closePrestige');
+const achievementNotification = document.getElementById('achievementNotification');
+const researchNotification = document.getElementById('researchNotification');
 const profileNameInput = document.getElementById('profileName');
 const saveProfileBtn = document.getElementById('saveProfile');
 const catPhotosDiv = document.querySelector('.cat-photos');
 const leaderboardList = document.getElementById('leaderboardList');
+const achievementsModalList = document.getElementById('achievementsModalList');
+const prestigeContent = document.getElementById('prestigeContent');
 // Sections for responsive reordering
-const achievementsSection = document.querySelector('.achievements');
-const catClickerSection = document.querySelector('.cat-clicker');
 const upgradesSection = document.querySelector('.upgrades');
+const catClickerSection = document.querySelector('.cat-clicker');
 
 // Research/upgrade DOM elements
-const researchSection = document.querySelector('.research');
-const researchUpgradesDiv = document.getElementById('researchUpgrades');
+const kittenLabContent = document.getElementById('kittenLabContent');
+const researchUpgradesDiv = document.getElementById('researchUpgrades'); // Keep for backward compatibility
 
 // --- Twemoji Helper Function ---
 function applyTwemoji(element) {
@@ -938,7 +975,11 @@ function loadState() {
                     tenUpgrades: { unlocked: false, activated: false },
                     hundredThousandMeows: { unlocked: false, activated: false },
                     millionMeows: { unlocked: false, activated: false },
-                    fiftyUpgrades: { unlocked: false, activated: false }
+                    fiftyUpgrades: { unlocked: false, activated: false },
+                    unemployed: { unlocked: false, activated: false },
+                    hiss: { unlocked: false, activated: false },
+                    iBelieveInYou: { unlocked: false, activated: false },
+                    realMeowster: { unlocked: false, activated: false }
                 };
             } else {
                 // Add new achievements if they don't exist
@@ -950,6 +991,18 @@ function loadState() {
                 }
                 if (!state.achievements.fiftyUpgrades) {
                     state.achievements.fiftyUpgrades = { unlocked: false, activated: false };
+                }
+                if (!state.achievements.unemployed) {
+                    state.achievements.unemployed = { unlocked: false, activated: false };
+                }
+                if (!state.achievements.hiss) {
+                    state.achievements.hiss = { unlocked: false, activated: false };
+                }
+                if (!state.achievements.iBelieveInYou) {
+                    state.achievements.iBelieveInYou = { unlocked: false, activated: false };
+                }
+                if (!state.achievements.realMeowster) {
+                    state.achievements.realMeowster = { unlocked: false, activated: false };
                 }
             }
             
@@ -1189,7 +1242,9 @@ function getResearchMultiplier(upgradeIndex) {
 }
 
 function renderResearchUpgrades() {
-    if (!researchUpgradesDiv) return;
+    // Use the modal content div, fall back to old div for compatibility
+    const targetDiv = kittenLabContent || researchUpgradesDiv;
+    if (!targetDiv) return;
     
     // Check for new available research
     checkAvailableResearch();
@@ -1205,18 +1260,37 @@ function renderResearchUpgrades() {
         
         if (nextResearch) {
             const nextResearchMessage = getUnlockMessage(nextResearch);
-            researchUpgradesDiv.innerHTML = `<p style="color: #aaa; font-style: italic; text-align: center;">No kitten research available yet.<br><br>🔬 Next unlock: ${nextResearchMessage}</p>`;
+            targetDiv.innerHTML = `<p style="color: #aaa; font-style: italic; text-align: center; grid-column: 1 / -1;">No kitten research available yet.<br><br>🔬 Next unlock: ${nextResearchMessage}</p>`;
         } else {
-            researchUpgradesDiv.innerHTML = '<p style="color: #aaa; font-style: italic; text-align: center;">No kitten research available yet. Keep playing to unlock new discoveries!</p>';
+            targetDiv.innerHTML = '<p style="color: #aaa; font-style: italic; text-align: center; grid-column: 1 / -1;">No kitten research available yet. Keep playing to unlock new discoveries!</p>';
         }
+        updateResearchNotification(); // Update notification badge
         return;
     }
     
-    researchUpgradesDiv.innerHTML = '';
+    targetDiv.innerHTML = '';
     
     console.log(`Creating ${availableUpgrades.length} research upgrade buttons:`, availableUpgrades);
     
-    availableUpgrades.forEach(upgradeId => {
+    // Sort research upgrades by affordability (affordable first, then by cost)
+    const sortedUpgrades = availableUpgrades.slice().sort((a, b) => {
+        const upgradeA = researchUpgrades.find(u => u.id === a);
+        const upgradeB = researchUpgrades.find(u => u.id === b);
+        
+        if (!upgradeA || !upgradeB) return 0;
+        
+        const canAffordA = state.meowCount >= upgradeA.baseCost;
+        const canAffordB = state.meowCount >= upgradeB.baseCost;
+        
+        // Affordable items first
+        if (canAffordA && !canAffordB) return -1;
+        if (!canAffordA && canAffordB) return 1;
+        
+        // If both affordable or both unaffordable, sort by cost (cheaper first)
+        return upgradeA.baseCost - upgradeB.baseCost;
+    });
+    
+    sortedUpgrades.forEach(upgradeId => {
         const upgrade = researchUpgrades.find(u => u.id === upgradeId);
         if (!upgrade) return;
         
@@ -1228,33 +1302,14 @@ function renderResearchUpgrades() {
         const btn = document.createElement('button');
         btn.className = 'research-upgrade-btn';
         btn.id = `research-${upgradeId}`; // Add ID for easier debugging
-        btn.style.cssText = `
-            background: linear-gradient(45deg, #1a1a2e, #16213e);
-            border: 2px solid #00fff7;
-            color: #ffffff;
-            padding: 1rem;
-            margin: 0.5rem 0;
-            border-radius: 10px;
-            cursor: pointer !important;
-            font-size: 0.9rem;
-            width: 100%;
-            text-align: left;
-            transition: all 0.2s ease;
-            box-shadow: 0 2px 10px rgba(0, 255, 255, 0.2);
-            pointer-events: auto !important;
-            position: relative;
-            z-index: 10;
-        `;
         
-        // Use CSS classes instead of inline styles for affordability state
+        // Use CSS classes instead of inline styles for better performance and to avoid conflicts
         if (canAfford) {
+            btn.classList.add('affordable');
             btn.classList.remove('disabled');
-            btn.style.borderColor = '#00fff7';
-            btn.style.boxShadow = '0 2px 15px rgba(0, 255, 255, 0.4)';
         } else {
             btn.classList.add('disabled');
-            btn.style.borderColor = '#666';
-            btn.style.boxShadow = '0 2px 10px rgba(0, 255, 255, 0.2)';
+            btn.classList.remove('affordable');
         }
         
         btn.innerHTML = `
@@ -1315,7 +1370,7 @@ function renderResearchUpgrades() {
         // Fallback onclick handler
         btn.onclick = handleResearchClick;
         
-        researchUpgradesDiv.appendChild(btn);
+        targetDiv.appendChild(btn);
         
         // Apply Twemoji to render emojis as images
         applyTwemoji(btn);
@@ -1324,7 +1379,10 @@ function renderResearchUpgrades() {
         console.log(`Button onclick handler:`, btn.onclick);
     });
     
-    console.log(`Total buttons created: ${researchUpgradesDiv.children.length}`);
+    console.log(`Total buttons created: ${targetDiv.children.length}`);
+    
+    // Update notification badge
+    updateResearchNotification();
 }
 
 // --- Upgrades ---
@@ -1345,7 +1403,7 @@ function renderUpgrades() {
                 <span class="upgrade-title">${upg.name}:</span>
                 <span class="upgrade-desc">${upg.desc}</span>
             </div>
-            ${researchMultiplier > 1 ? `<div class="upgrade-research-bonus" style="color: #00fff7; font-size: 0.8rem; margin-top: 2px; margin-bottom: 4px;">(${formatNumber((researchMultiplier - 1) * 100)}% research bonus)</div>` : ''}
+            ${researchMultiplier > 1 ? `<div class="upgrade-lab-bonus" style="color: #00fff7; font-size: 0.8rem; margin-top: 2px; margin-bottom: 4px;">(${formatNumber((researchMultiplier - 1) * 100)}% lab bonus)</div>` : ''}
             <div class="upgrade-line2">
                 <span class="upgrade-mps">+${formatNumber(effectiveMPS)}/sec</span>
                 <span class="upgrade-owned">Owned: ${state.upgrades[i]}</span>
@@ -1457,33 +1515,11 @@ function checkAchievements() {
 }
 
 function renderAchievements() {
+    // Apply glow effects based on activated achievements
     Object.keys(achievements).forEach(id => {
-        const btn = achievementBtns[id];
-        const achievement = achievements[id];
         const stateAchievement = state.achievements[id];
         
-        if (!btn) return;
-        
-        // Create the achievement content
-        btn.innerHTML = `
-            <div class="achievement-title">${achievement.name}</div>
-            <div class="achievement-desc">${achievement.desc}</div>
-            <div class="achievement-reward">+${formatNumber(achievement.reward)} meows/click</div>
-        `;
-        
-        // Reset classes
-        btn.className = 'achievement-btn';
-        
         if (stateAchievement.activated) {
-            btn.classList.add('activated');
-            btn.disabled = true;
-            // Add checkmark to activated achievements
-            btn.innerHTML = `
-                <div class="achievement-title">${achievement.name} ✓</div>
-                <div class="achievement-desc">${achievement.desc}</div>
-                <div class="achievement-reward">+${formatNumber(achievement.reward)} meows/click</div>
-            `;
-            // Apply glow styles based on activated achievements
             if (id === 'fiftyUpgrades') {
                 // Only show silver if gold isn't active
                 const goldActive = !!(state.achievements.millionMeows && state.achievements.millionMeows.activated);
@@ -1493,13 +1529,7 @@ function renderAchievements() {
                 catBtn.classList.add('millionaire-glow'); // gold
                 catBtn.classList.remove('legend-glow'); // override silver
             }
-        } else if (stateAchievement.unlocked) {
-            btn.classList.add('unlocked');
-            btn.disabled = false;
         } else {
-            btn.disabled = true;
-            // Gray out locked achievements
-            btn.style.opacity = '0.6';
             // Remove glows if deactivated (safety)
             if (id === 'fiftyUpgrades') catBtn.classList.remove('legend-glow');
             if (id === 'millionMeows') catBtn.classList.remove('millionaire-glow');
@@ -1508,36 +1538,211 @@ function renderAchievements() {
     
     // Update prestige display after achievements
     updatePrestigeDisplay();
+    
+    // Update achievement notification badge
+    updateAchievementNotification();
 }
 
-// Achievement click handlers
-Object.keys(achievementBtns).forEach(id => {
-    const btn = achievementBtns[id];
-    if (btn) {
-        btn.onclick = () => {
-            const achievement = achievements[id];
-            const stateAchievement = state.achievements[id];
-            
-            if (stateAchievement.unlocked && !stateAchievement.activated) {
+function updateAchievementNotification() {
+    if (!achievementNotification) return;
+    
+    // Check if there are any unlocked but not activated achievements
+    const hasUnclaimedAchievements = Object.keys(achievements).some(id => {
+        const stateAchievement = state.achievements[id];
+        return stateAchievement.unlocked && !stateAchievement.activated;
+    });
+    
+    if (hasUnclaimedAchievements) {
+        achievementNotification.classList.remove('hidden');
+    } else {
+        achievementNotification.classList.add('hidden');
+    }
+}
+
+function updateResearchNotification() {
+    if (!researchNotification) return;
+    
+    // Check if there are any available research upgrades the player can afford
+    const hasAffordableResearch = state.research.availableUpgrades.some(upgradeId => {
+        const upgrade = researchUpgrades.find(u => u.id === upgradeId);
+        if (!upgrade) return false;
+        return state.meowCount >= upgrade.baseCost;
+    });
+    
+    if (hasAffordableResearch) {
+        researchNotification.classList.remove('hidden');
+    } else {
+        researchNotification.classList.add('hidden');
+    }
+}
+
+function renderAchievementsModal() {
+    if (!achievementsModalList) return;
+    
+    achievementsModalList.innerHTML = '';
+    
+    // Sort achievements by priority: unlocked (not activated) first, then activated, then locked
+    const sortedAchievements = Object.keys(achievements).sort((a, b) => {
+        const stateA = state.achievements[a];
+        const stateB = state.achievements[b];
+        
+        // Priority: unlocked but not activated (2), activated (1), locked (0)
+        const getPriority = (stateAchievement) => {
+            if (stateAchievement.unlocked && !stateAchievement.activated) return 2;
+            if (stateAchievement.activated) return 1;
+            return 0;
+        };
+        
+        return getPriority(stateB) - getPriority(stateA);
+    });
+    
+    sortedAchievements.forEach(id => {
+        const achievement = achievements[id];
+        const stateAchievement = state.achievements[id];
+        
+        const item = document.createElement('div');
+        item.className = 'achievement-modal-item';
+        
+        let statusClass = 'locked';
+        let statusText = 'Locked';
+        
+        if (stateAchievement.activated) {
+            item.classList.add('activated');
+            statusClass = 'activated';
+            statusText = 'Activated ✓';
+        } else if (stateAchievement.unlocked) {
+            item.classList.add('unlocked');
+            statusClass = 'unlocked';
+            statusText = 'Click to Activate!';
+        } else {
+            item.classList.add('locked');
+        }
+        
+        item.innerHTML = `
+            <div class="achievement-modal-title">${achievement.name}</div>
+            <div class="achievement-modal-desc">${achievement.desc}</div>
+            <div class="achievement-modal-reward">Reward: +${formatNumber(achievement.reward)} meows per click</div>
+            <div class="achievement-modal-status status-${statusClass}">${statusText}</div>
+        `;
+        
+        // Add click handler for unlocked but not activated achievements
+        if (stateAchievement.unlocked && !stateAchievement.activated) {
+            item.addEventListener('click', () => {
                 stateAchievement.activated = true;
                 state.meowsPerClick += achievement.reward;
                 updateStats();
                 renderAchievements();
-                saveStateWithGlobal(); // Achievement activation - important for global leaderboard
+                renderAchievementsModal(); // Refresh the modal
+                saveStateWithGlobal();
                 showAchievementBanner(`${achievement.name} activated! +${achievement.reward} meows per click!`);
-                // Extra safety: apply glow immediately on activation
+                
+                // Apply glow effects if needed
                 if (id === 'fiftyUpgrades') {
                     const goldActive = !!(state.achievements.millionMeows && state.achievements.millionMeows.activated);
                     if (!goldActive) catBtn.classList.add('legend-glow');
                 }
                 if (id === 'millionMeows') {
                     catBtn.classList.add('millionaire-glow');
-                    catBtn.classList.remove('legend-glow'); // gold overrides silver
+                    catBtn.classList.remove('legend-glow');
                 }
-            }
-        };
+            });
+        }
+        
+        achievementsModalList.appendChild(item);
+    });
+}
+
+function renderPrestigeModal() {
+    if (!prestigeContent) return;
+    
+    const heavenlyTreats = state.prestige.heavenlyTreats;
+    const availableTreats = calculateHeavenlyTreats();
+    const canPrestigeNow = canPrestige();
+    
+    let content = `
+        <div style="text-align: center; margin-bottom: 1.5rem;">
+            <div style="font-size: 1.2rem; font-weight: bold; color: #ffd700; margin-bottom: 0.5rem;">
+                ✨ Prestige Level: ${state.prestige.level} ✨
+            </div>
+            <div style="font-size: 1rem; color: #fff; margin-bottom: 0.5rem;">
+                💫 Heavenly Treats: ${heavenlyTreats} 💫
+            </div>
+            <div style="font-size: 0.9rem; color: #aaa; font-style: italic;">
+                Heavenly Treats unlock permanent bonuses for all future runs!
+            </div>
+        </div>
+    `;
+    
+    if (canPrestigeNow) {
+        const newTreats = availableTreats - heavenlyTreats;
+        content += `
+            <div style="text-align: center; margin-bottom: 1.5rem;">
+                <button onclick="performPrestige()" style="
+                    background: linear-gradient(45deg, #ffd700, #ffed4e, #ffa500); 
+                    border: 2px solid #fff;
+                    padding: 1rem 2rem; 
+                    border-radius: 12px; 
+                    cursor: pointer; 
+                    font-weight: bold; 
+                    color: #8b4513;
+                    font-size: 1.1rem;
+                    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.6);
+                    transition: all 0.2s ease;
+                    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+                " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    🌟 Ascend to Prestige ${state.prestige.level + 1} (+${newTreats} treats) 🌟
+                </button>
+            </div>
+        `;
+    } else {
+        content += `
+            <div style="text-align: center; margin-bottom: 1.5rem; color: #aaa;">
+                Reach 1 billion total meows to unlock prestige!
+            </div>
+        `;
     }
-});
+    
+    // Show prestige upgrades if player has any treats or has prestiged
+    if (state.prestige.level > 0 || heavenlyTreats > 0) {
+        content += `
+            <div style="margin-top: 1.5rem;">
+                <h3 style="color: #ffd700; text-align: center; margin-bottom: 1rem;">🏪 Heavenly Treats Shop 🏪</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+        `;
+        
+        // Add prestige upgrade buttons (simplified version)
+        prestigeUpgrades.forEach(upgrade => {
+            const currentLevel = getPrestigeUpgradeLevel(upgrade.id);
+            const cost = getPrestigeUpgradeCost(upgrade.id, currentLevel);
+            const canBuy = canBuyPrestigeUpgrade(upgrade.id);
+            const maxedOut = currentLevel >= upgrade.maxLevel;
+            
+            content += `
+                <button onclick="buyPrestigeUpgrade('${upgrade.id}')" 
+                        style="background: linear-gradient(45deg, #4a0e4e, #2d1b69); 
+                               border: 2px solid ${canBuy && !maxedOut ? '#ffd700' : '#666'}; 
+                               color: ${canBuy && !maxedOut ? '#ffd700' : '#aaa'};
+                               padding: 1rem; border-radius: 8px; cursor: ${canBuy && !maxedOut ? 'pointer' : 'not-allowed'};
+                               font-size: 0.9rem; text-align: left;"
+                        ${!canBuy || maxedOut ? 'disabled' : ''}>
+                    <div style="font-weight: bold; margin-bottom: 0.3rem;">
+                        ${upgrade.name} ${currentLevel > 0 ? `(Lv.${currentLevel})` : ''}
+                    </div>
+                    <div style="font-size: 0.8rem; opacity: 0.8; margin-bottom: 0.3rem;">
+                        ${upgrade.desc}
+                    </div>
+                    <div style="font-size: 0.8rem;">
+                        ${maxedOut ? 'MAX LEVEL' : `Cost: ${cost} treats`}
+                    </div>
+                </button>
+            `;
+        });
+        
+        content += '</div></div>';
+    }
+    
+    prestigeContent.innerHTML = content;
+}
 
 function updateStats() {
     calcMeowsPerSecond();
@@ -1663,10 +1868,9 @@ function updatePrestigeDisplay() {
             document.head.appendChild(styles);
         }
         
-        // Insert after the achievements section
-        const achievementsSection = document.querySelector('.achievements');
-        if (achievementsSection) {
-            achievementsSection.appendChild(prestigeInfo);
+        // Insert after the cat clicker button
+        if (catClickerSection) {
+            catClickerSection.appendChild(prestigeInfo);
         }
     }
     
@@ -1720,10 +1924,9 @@ function updatePrestigeDisplay() {
                 prestigeToggleBtn.innerHTML = isVisible ? '✨ Prestige Menu ✨' : '✨ Hide Prestige ✨';
             };
             
-            // Insert button before the prestige info
-            const achievementsSection = document.querySelector('.achievements');
-            if (achievementsSection) {
-                achievementsSection.appendChild(prestigeToggleBtn);
+            // Insert button in the cat clicker section
+            if (catClickerSection) {
+                catClickerSection.appendChild(prestigeToggleBtn);
             }
         }
         
@@ -2272,9 +2475,33 @@ if (leaderboardBtn && leaderboardModal && closeLeaderboard) {
     };
     closeLeaderboard.onclick = () => leaderboardModal.classList.add('hidden');
 }
+if (achievementsBtn && achievementsModal && closeAchievements) {
+    achievementsBtn.onclick = () => {
+        renderAchievementsModal();
+        achievementsModal.classList.remove('hidden');
+    };
+    closeAchievements.onclick = () => achievementsModal.classList.add('hidden');
+}
+if (kittenLabBtn && kittenLabModal && closeKittenLab) {
+    kittenLabBtn.onclick = () => {
+        renderResearchUpgrades(); // Refresh the research content
+        kittenLabModal.classList.remove('hidden');
+    };
+    closeKittenLab.onclick = () => kittenLabModal.classList.add('hidden');
+}
+if (prestigeBtn && prestigeModal && closePrestige) {
+    prestigeBtn.onclick = () => {
+        renderPrestigeModal(); // Refresh the prestige content
+        prestigeModal.classList.remove('hidden');
+    };
+    closePrestige.onclick = () => prestigeModal.classList.add('hidden');
+}
 window.onclick = function(event) {
     if (profileModal && event.target === profileModal) profileModal.classList.add('hidden');
     if (leaderboardModal && event.target === leaderboardModal) leaderboardModal.classList.add('hidden');
+    if (achievementsModal && event.target === achievementsModal) achievementsModal.classList.add('hidden');
+    if (kittenLabModal && event.target === kittenLabModal) kittenLabModal.classList.add('hidden');
+    if (prestigeModal && event.target === prestigeModal) prestigeModal.classList.add('hidden');
 };
 
 // --- Initialization ---
@@ -2298,7 +2525,11 @@ if (!state.achievements) {
         tenUpgrades: { unlocked: false, activated: false },
         hundredThousandMeows: { unlocked: false, activated: false },
         millionMeows: { unlocked: false, activated: false },
-        fiftyUpgrades: { unlocked: false, activated: false }
+        fiftyUpgrades: { unlocked: false, activated: false },
+        unemployed: { unlocked: false, activated: false },
+        hiss: { unlocked: false, activated: false },
+        iBelieveInYou: { unlocked: false, activated: false },
+        realMeowster: { unlocked: false, activated: false }
     };
 }
 if (typeof state.meowCount !== 'number') state.meowCount = 0;
@@ -2334,52 +2565,9 @@ catBtn.classList.toggle('millionaire-glow', hasMillion);
 updateEffectDisplay();
 
 window.addEventListener('beforeunload', saveState);
-// --- Responsive: place Achievements under Upgrades on mobile, under Cat on desktop ---
-function rearrangeForViewport() {
-    if (!achievementsSection || !catClickerSection || !upgradesSection) return;
-    const isMobile = window.innerWidth <= 768;
-    if (isMobile) {
-        // Move Achievements to be after Upgrades (Upgrades above Achievements)
-        if (achievementsSection.previousElementSibling !== upgradesSection && achievementsSection.parentElement !== upgradesSection.parentElement) {
-            upgradesSection.insertAdjacentElement('afterend', achievementsSection);
-        } else if (achievementsSection.previousElementSibling !== upgradesSection) {
-            upgradesSection.insertAdjacentElement('afterend', achievementsSection);
-        }
-    } else {
-        // Restore Achievements back under the Cat Clicker
-        if (achievementsSection.parentElement !== catClickerSection) {
-            catClickerSection.appendChild(achievementsSection);
-        }
-    }
-}
-// Run once on load and on resize (debounced)
-rearrangeForViewport();
-let _rzT;
-window.addEventListener('resize', () => {
-    clearTimeout(_rzT);
-    _rzT = setTimeout(rearrangeForViewport, 100);
-});
+// --- Responsive layout management ---
+// (Achievements section removed - no longer needed)
 }; // End of window.onload
-
-// Early, no-flash mobile reorder (runs immediately when script loads at end of body)
-(function earlyReorder() {
-    try {
-        const achievementsSection = document.querySelector('.achievements');
-        const catClickerSection = document.querySelector('.cat-clicker');
-        const upgradesSection = document.querySelector('.upgrades');
-        if (!achievementsSection || !catClickerSection || !upgradesSection) return;
-        const isMobile = window.innerWidth <= 768;
-        if (isMobile) {
-            if (achievementsSection.previousElementSibling !== upgradesSection) {
-                upgradesSection.insertAdjacentElement('afterend', achievementsSection);
-            }
-        } else {
-            if (achievementsSection.parentElement !== catClickerSection) {
-                catClickerSection.appendChild(achievementsSection);
-            }
-        }
-    } catch {}
-})();
 
 // Create footer with user credit
 const footer = document.createElement('footer');
