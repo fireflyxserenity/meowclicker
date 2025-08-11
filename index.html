@@ -14,24 +14,30 @@
             <h1 class="title">MEOW CLICKER</h1>
         </div>
         <div class="header-right">
-            <button id="kittenLabBtn" class="header-btn">
-                <span aria-hidden="true">
-                    <img src="https://cdn3.emoji.gg/emojis/36389-sparkly-gold-cat.png"
-                         alt=""
-                         style="width:1em; height:1em; vertical-align:middle; margin-right: 0.3em;">
-                </span>
-                Kitten Lab
-                <span id="researchNotification" class="notification-badge hidden">!</span>
-            </button>
-            <button id="prestigeBtn" class="header-btn">
-                ✨ Prestige
-            </button>
-            <button id="achievementsBtn" class="header-btn">
-                Achievements
-                <span id="achievementNotification" class="notification-badge hidden">!</span>
-            </button>
-            <button id="profileBtn" class="header-btn">Profile</button>
-            <button id="leaderboardBtn" class="header-btn">Leaderboard</button>
+            <!-- Game Features Group -->
+            <div class="button-group game-features">
+                <button id="kittenLabBtn" class="header-btn">
+                    🧪 Lab
+                    <span id="researchNotification" class="notification-badge hidden">!</span>
+                </button>
+                <button id="achievementsBtn" class="header-btn">
+                    🏆 Goals
+                    <span id="achievementNotification" class="notification-badge hidden">!</span>
+                </button>
+            </div>
+            
+            <!-- Meta Progression Group -->
+            <div class="button-group meta-progression">
+                <button id="prestigeBtn" class="header-btn prestige-btn">
+                    ✨ Prestige
+                </button>
+            </div>
+            
+            <!-- Social Features Group -->
+            <div class="button-group social-features">
+                <button id="profileBtn" class="header-btn">👤 Profile</button>
+                <button id="leaderboardBtn" class="header-btn">📊 Ranks</button>
+            </div>
         </div>
     </header>
 
