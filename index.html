@@ -14,6 +14,22 @@
             <h1 class="title">MEOW CLICKER</h1>
         </div>
         <div class="header-right">
+            <button id="kittenLabBtn" class="header-btn">
+                <span aria-hidden="true">
+                    <img src="https://cdn3.emoji.gg/emojis/36389-sparkly-gold-cat.png"
+                         alt=""
+                         style="width:1em; height:1em; vertical-align:middle; margin-right: 0.3em;">
+                </span>
+                Kitten Lab
+                <span id="researchNotification" class="notification-badge hidden">!</span>
+            </button>
+            <button id="prestigeBtn" class="header-btn">
+                ✨ Prestige
+            </button>
+            <button id="achievementsBtn" class="header-btn">
+                Achievements
+                <span id="achievementNotification" class="notification-badge hidden">!</span>
+            </button>
             <button id="profileBtn" class="header-btn">Profile</button>
             <button id="leaderboardBtn" class="header-btn">Leaderboard</button>
         </div>
@@ -40,19 +56,6 @@
                     <img id="mainCatImg" src="cat.png" alt="Cat" class="cat-img">
                     <div id="catFallback">🐾 Cat</div>
                 </button>
-                <div class="achievements">
-                    <h3 class="achievements-header">Achievements</h3>
-                    <div class="achievement-list">
-                        <button class="achievement-btn" id="firstMeow">First Meow</button>
-                        <button class="achievement-btn" id="hundredMeows">Meow Century</button>
-                        <button class="achievement-btn" id="firstUpgrade">First Upgrade</button>
-                        <button class="achievement-btn" id="thousandMeows">Meow Thousand</button>
-                        <button class="achievement-btn" id="tenUpgrades">Upgrade Master</button>
-                        <button class="achievement-btn" id="hundredThousandMeows">Meow Mogul</button>
-                        <button class="achievement-btn" id="millionMeows">Meow Millionaire</button>
-                        <button class="achievement-btn" id="fiftyUpgrades">Upgrade Legend</button>
-                    </div>
-                </div>
             </div>
             <section class="upgrades">
                 <h2 class="upgrades-header">Upgrades</h2>
@@ -67,24 +70,20 @@
                         <button class="upgrade-btn" id="interdimensionalCatPortal">Interdimensional Cat Portal</button>
                     </div>
             </section>
-            
-            <!-- Research Section -->
-            <section class="research">
-                <h3>
-  <span aria-hidden="true">
-    <img src="https://cdn3.emoji.gg/emojis/36389-sparkly-gold-cat.png"
-         alt=""
-         style="width:1em; height:1em; vertical-align:middle;">
-  </span>
-  Kitten Lab
-</h3>
-                <div id="researchUpgrades" class="research-upgrades">
-                    <p style="color: #aaa; font-style: italic; text-align: center;">No kitten research available yet. Keep playing to unlock new discoveries!</p>
-                </div>
-            </section>
         </div>
     </main>
     </main>
+
+    <!-- Prestige Modal -->
+    <div id="prestigeModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close" id="closePrestige">&times;</span>
+            <h2>✨ Prestige System ✨</h2>
+            <div id="prestigeContent">
+                <!-- Prestige content will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
 
     <!-- Profile Modal -->
     <div id="profileModal" class="modal hidden">
@@ -111,6 +110,37 @@
                 <label for="uploadDataInput" class="header-btn" style="cursor:pointer;display:inline-block;margin: 0.5rem;">Upload Save
                     <input type="file" id="uploadDataInput" accept="application/json" style="display:none;">
                 </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Achievements Modal -->
+    <div id="achievementsModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close" id="closeAchievements">&times;</span>
+            <h2>Achievements</h2>
+            <p style="color: #aaa; margin-bottom: 1rem;">Click unlocked achievements to activate them for bonus meows per click!</p>
+            <div id="achievementsModalList" class="achievements-modal-list">
+                <!-- Achievement items will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Kitten Lab Modal -->
+    <div id="kittenLabModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close" id="closeKittenLab">&times;</span>
+            <h2>
+                <span aria-hidden="true">
+                    <img src="https://cdn3.emoji.gg/emojis/36389-sparkly-gold-cat.png"
+                         alt=""
+                         style="width:1.5em; height:1.5em; vertical-align:middle; margin-right: 0.5em;">
+                </span>
+                Kitten Lab
+            </h2>
+            <p style="color: #aaa; margin-bottom: 1rem;">Advanced research to boost your meow empire!</p>
+            <div id="kittenLabContent" class="research-upgrades">
+                <p style="color: #aaa; font-style: italic; text-align: center; grid-column: 1 / -1;">No kitten research available yet. Keep playing to unlock new discoveries!</p>
             </div>
         </div>
     </div>
