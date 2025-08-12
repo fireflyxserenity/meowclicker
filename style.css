@@ -152,6 +152,14 @@
     }
 }
 
+/* Ensure consistent background across all devices */
+html {
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a0d2e 25%, #2d1b69 50%, #0f0f23 75%, #000 100%);
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease infinite;
+    min-height: 100%;
+}
+
 body {
     background: linear-gradient(135deg, #0a0a0a 0%, #1a0d2e 25%, #2d1b69 50%, #0f0f23 75%, #000 100%);
     background-size: 400% 400%;
@@ -803,6 +811,13 @@ body::before {
 /* Mobile responsive */
 @media (max-width: 768px) {
     /* Prevent zoom on double tap */
+    html {
+        background: linear-gradient(135deg, #0a0a0a 0%, #1a0d2e 25%, #2d1b69 50%, #0f0f23 75%, #000 100%) !important;
+        background-size: 400% 400% !important;
+        animation: gradientShift 15s ease infinite !important;
+        min-height: 100% !important;
+    }
+    
     body {
         touch-action: manipulation;
         -webkit-touch-callout: none;
@@ -811,6 +826,11 @@ body::before {
         -moz-user-select: none;
         -ms-user-select: none;
         user-select: none;
+        /* Force the same background as desktop */
+        background: linear-gradient(135deg, #0a0a0a 0%, #1a0d2e 25%, #2d1b69 50%, #0f0f23 75%, #000 100%) !important;
+        background-size: 400% 400% !important;
+        animation: gradientShift 15s ease infinite !important;
+        min-height: 100vh !important;
     }
     
     .achievement-banner {
@@ -1023,6 +1043,21 @@ body::before {
 
 /* Extra small mobile devices */
 @media (max-width: 480px) {
+    /* Ensure background consistency on very small screens */
+    html {
+        background: linear-gradient(135deg, #0a0a0a 0%, #1a0d2e 25%, #2d1b69 50%, #0f0f23 75%, #000 100%) !important;
+        background-size: 400% 400% !important;
+        animation: gradientShift 15s ease infinite !important;
+        min-height: 100% !important;
+    }
+    
+    body {
+        background: linear-gradient(135deg, #0a0a0a 0%, #1a0d2e 25%, #2d1b69 50%, #0f0f23 75%, #000 100%) !important;
+        background-size: 400% 400% !important;
+        animation: gradientShift 15s ease infinite !important;
+        min-height: 100vh !important;
+    }
+    
     .header {
         padding: 0.6rem 0.5rem;
     }
