@@ -1003,6 +1003,15 @@ body::before {
         margin: 0.2rem !important;
         display: inline-block !important;
     }
+    
+    /* Golden Paw mobile optimization */
+    #goldenPaw {
+        width: 70px !important;
+        height: 70px !important;
+        font-size: 3.5rem !important;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+    }
 }
 
 /* Extra small mobile devices */
@@ -1137,6 +1146,17 @@ body::before {
     #leaderboardList {
         max-height: 250px;
         font-size: 0.9rem;
+    }
+    
+    /* Golden Paw mobile optimization for small screens */
+    #goldenPaw {
+        width: 80px !important;
+        height: 80px !important;
+        font-size: 4rem !important;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+        min-width: 80px !important;
+        min-height: 80px !important;
     }
 }
 
