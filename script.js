@@ -707,9 +707,12 @@ function spawnGoldenPaw() {
             transition: transform 0.1s ease;
         `;
         
-        // Random position on screen (avoid edges)
-        const x = Math.random() * (window.innerWidth - 100) + 50;
-        const y = Math.random() * (window.innerHeight - 100) + 50;
+        // Random position on screen (avoid edges, account for mobile)
+        const isMobile = window.innerWidth <= 768;
+        const pawSize = isMobile ? 80 : 60;
+        const margin = pawSize + 20; // Extra margin for safety
+        const x = Math.random() * (window.innerWidth - margin * 2) + margin;
+        const y = Math.random() * (window.innerHeight - margin * 2) + margin;
         goldenPaw.style.left = x + 'px';
         goldenPaw.style.top = y + 'px';
         
