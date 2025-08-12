@@ -160,6 +160,49 @@
         </div>
     </div>
 
+    <!-- Prestige Confirmation Modal -->
+    <div id="prestigeConfirmModal" class="modal hidden">
+        <div class="modal-content prestige-confirm">
+            <div class="prestige-confirm-header">
+                <h2>✨ Prestige Confirmation ✨</h2>
+            </div>
+            <div class="prestige-confirm-body">
+                <div class="prestige-warning">
+                    <span class="warning-icon">⚠️</span>
+                    <p>Are you sure you want to prestige?</p>
+                </div>
+                <div class="prestige-rewards">
+                    <div class="reward-item">
+                        <span class="reward-icon">🌟</span>
+                        <span id="prestigeRewardText">You will gain X Heavenly Treats</span>
+                    </div>
+                </div>
+                <div class="prestige-consequences">
+                    <div class="consequence-item">
+                        <span class="consequence-icon">🔄</span>
+                        <span>All progress will be reset</span>
+                    </div>
+                    <div class="consequence-item">
+                        <span class="consequence-icon">💫</span>
+                        <span>Heavenly bonuses will be kept</span>
+                    </div>
+                    <div class="consequence-item">
+                        <span class="consequence-icon">⚡</span>
+                        <span>Future runs will be more powerful</span>
+                    </div>
+                </div>
+            </div>
+            <div class="prestige-confirm-buttons">
+                <button id="prestigeConfirmYes" class="prestige-confirm-btn prestige-yes">
+                    ✨ Yes, Prestige! ✨
+                </button>
+                <button id="prestigeConfirmNo" class="prestige-confirm-btn prestige-no">
+                    ❌ Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Firebase SDK -->
     <script type="module">
         // Import Firebase modules
