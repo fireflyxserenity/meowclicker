@@ -893,60 +893,9 @@ window.performPrestige = function() {
     
     // Confirm prestige
     const newTreats = calculateHeavenlyTreats(); // Treats gained from this run only
-    const confirmation = confirm(
-        `Are you sure you want to prestige?\n\n` +
-        `You will gain ${newTreats} Heavenly Treats from this run.\n` +
-        `All progress will be reset, but you'll keep your heavenly bonuses!\n\n` +
-        `This will make future runs much more powerful.`
-    );
     
-    if (!confirmation) return;
-    
-    // Set cooldown timestamp
-    window.prestigeCooldown = Date.now();
-    
-    // Update prestige stats
-    state.prestige.totalMeowsEver += state.meowCount;
-    state.prestige.heavenlyTreats += newTreats; // Add new treats to existing total
-    state.prestige.level++;
-    
-    // Reset game progress
-    state.meowCount = 0;
-    state.totalClicks = 0;
-    state.meowsPerClick = 1;
-    state.upgrades = [0, 0, 0, 0, 0, 0, 0, 0];
-    
-    // Reset achievements but keep activated ones for next run
-    Object.keys(state.achievements).forEach(id => {
-        state.achievements[id].unlocked = false;
-        // Keep activated status for permanent bonuses
-    });
-    
-    // Reset golden paw effects
-    state.goldenPaw.clickMultiplier = 1;
-    state.goldenPaw.productionMultiplier = 1;
-    state.goldenPaw.effectEndTime = 0;
-    state.goldenPaw.activeEffect = null;
-    state.goldenPaw.isActive = false;
-    
-    // Apply starting bonuses from prestige upgrades
-    applyPrestigeBonus('eternal_meows');
-    
-    // Update display
-    updateStats();
-    renderUpgrades();
-    renderAchievements();
-    updateEffectDisplay();
-    
-    // Close the prestige modal and refresh its content for next time
-    const prestigeModal = document.getElementById('prestigeModal');
-    if (prestigeModal) {
-        prestigeModal.classList.add('hidden');
-    }
-    
-    showAchievementBanner(`🌟 Prestige ${state.prestige.level}! You gained ${newTreats} Heavenly Treats! Your journey begins anew with heavenly power!`);
-    
-    saveStateWithGlobal();
+    // Show custom prestige confirmation modal
+    showPrestigeConfirmation(newTreats);
 };
 
 // Tree helper functions
@@ -2441,6 +2390,101 @@ function updatePrestigeDisplay() {
     
     // OLD PRESTIGE SYSTEM REMOVED - Now using header button + modal
     // The prestige functionality is handled by the header button and modal system
+}
+
+// Custom Prestige Confirmation Modal
+function showPrestigeConfirmation(newTreats) {
+    const modal = document.getElementById('prestigeConfirmModal');
+    const rewardText = document.getElementById('prestigeRewardText');
+    const yesBtn = document.getElementById('prestigeConfirmYes');
+    const noBtn = document.getElementById('prestigeConfirmNo');
+    
+    // Update the reward text
+    rewardText.textContent = `You will gain ${newTreats} Heavenly Treats from this run`;
+    
+    // Show the modal
+    modal.classList.remove('hidden');
+    
+    // Handle Yes button
+    yesBtn.onclick = () => {
+        modal.classList.add('hidden');
+        executePrestige(newTreats);
+    };
+    
+    // Handle No button
+    noBtn.onclick = () => {
+        modal.classList.add('hidden');
+    };
+    
+    // Close modal when clicking outside
+    modal.onclick = (e) => {
+        if (e.target === modal) {
+            modal.classList.add('hidden');
+        }
+    };
+}
+
+function executePrestige(newTreats) {
+    // Set cooldown timestamp
+    window.prestigeCooldown = Date.now();
+    
+    // Update prestige stats
+    state.prestige.totalMeowsEver += state.meowCount;
+    state.prestige.heavenlyTreats += newTreats; // Add new treats to existing total
+    state.prestige.level++;
+    
+    // Reset game progress
+    state.meowCount = 0;
+    state.totalClicks = 0;
+    state.meowsPerClick = 1;
+    state.upgrades = [0, 0, 0, 0, 0, 0, 0, 0];
+    
+    // Reset achievements but keep activated ones for next run
+    Object.keys(state.achievements).forEach(id => {
+        if (!state.achievements[id].activated) {
+            state.achievements[id].unlocked = false;
+        }
+    });
+    
+    // Reset research upgrades
+    if (state.research) {
+        Object.keys(state.research).forEach(id => {
+            state.research[id].purchased = false;
+        });
+    }
+    
+    // Reset golden paw effects
+    state.goldenPaw = {
+        isActive: false,
+        lastSpawn: 0,
+        clickMultiplier: 1,
+        productionMultiplier: 1,
+        effectEndTime: 0,
+        activeEffect: null
+    };
+    
+    // Apply starting bonuses from prestige upgrades
+    applyPrestigeBonus('eternal_meows');
+    
+    // Show achievement banner
+    showAchievementBanner(`🌟 Prestige ${state.prestige.level}! You gained ${newTreats} Heavenly Treats! Your journey begins anew with heavenly power!`);
+    
+    // Update displays
+    updateStats();
+    renderUpgrades();
+    renderAchievements();
+    renderPrestigeModal();
+    renderKittenLabModal();
+    updateEffectDisplay();
+    
+    // Close the prestige modal and refresh its content for next time
+    const prestigeModal = document.getElementById('prestigeModal');
+    if (prestigeModal) {
+        prestigeModal.classList.add('hidden');
+    }
+    
+    // Save state
+    saveStateWithGlobal();
 }
 
 // Optimized cat button handler for rapid clicking
