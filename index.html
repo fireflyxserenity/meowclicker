@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Meow Clicker</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/twemoji@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+            <h1 class="title">MEOW CLICKER</h1>
+        </div>
+        <div class="header-right">
+            <!-- Game Features Group -->
+            <div class="button-group game-features">
+                <button id="kittenLabBtn" class="header-btn">
+                    🧪 Lab
+                    <span id="researchNotification" class="notification-badge hidden">!</span>
+                </button>
+                <button id="achievementsBtn" class="header-btn">
+                    🏆 Goals
+                    <span id="achievementNotification" class="notification-badge hidden">!</span>
+                </button>
+            </div>
+            
+            <!-- Meta Progression Group -->
+            <div class="button-group meta-progression">
+                <button id="prestigeBtn" class="header-btn prestige-btn">
+                    ✨ Prestige
+                </button>
+            </div>
+            
+            <!-- Social Features Group -->
+            <div class="button-group social-features">
+                <button id="profileBtn" class="header-btn">👤 Profile</button>
+                <button id="leaderboardBtn" class="header-btn">📊 Ranks</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Achievement notification banner -->
+    <div id="achievementBanner" class="achievement-banner hidden">
+        <span id="bannerText"></span>
+        <button id="closeBanner">&times;</button>
+    </div>
+
+
+    <section class="stats">
+        <div class="stat"><span id="totalMeows">0</span><br>Total Meows</div>
+        <div class="stat"><span id="meowsPerSecond">0</span><br>Meows/sec</div>
+        <div class="stat"><span id="meowsPerClick">1</span><br>Meows/click</div>
+        <div class="stat"><span id="totalClicks">0</span><br>Total Clicks</div>
+    </section>
+
+    <main class="main-content">
+        <div class="game-layout">
+            <div class="cat-clicker">
+                <button id="catButton" class="cat-btn" tabindex="0" role="button" aria-label="Click the cat to earn meows">
+                    <img id="mainCatImg" src="cat.png" alt="Cat" class="cat-img">
+                    <div id="catFallback">🐾 Cat</div>
+                </button>
+            </div>
+            <section class="upgrades">
+                <h2 class="upgrades-header">Upgrades</h2>
+                    <div class="upgrade-list">
+                        <button class="upgrade-btn" id="kittenHelper">Kitten Helper</button>
+                        <button class="upgrade-btn" id="laserPointer">Laser Pointer</button>
+                        <button class="upgrade-btn" id="catnipFarm">Catnip Farm</button>
+                        <button class="upgrade-btn" id="catTower">Cat Tower</button>
+                        <button class="upgrade-btn" id="catCafe">Cat Cafe</button>
+                        <button class="upgrade-btn" id="meowingMachine">Meowing Machine</button>
+                        <button class="upgrade-btn" id="catUniversity">Cat University</button>
+                        <button class="upgrade-btn" id="interdimensionalCatPortal">Interdimensional Cat Portal</button>
+                    </div>
+            </section>
+        </div>
+    </main>
+    </main>
+
+    <!-- Prestige Modal -->
+    <div id="prestigeModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close" id="closePrestige">&times;</span>
+            <h2>✨ Prestige System ✨</h2>
+            <div id="prestigeContent">
+                <!-- Prestige content will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div id="profileModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close" id="closeProfile">&times;</span>
+            <h2>Edit Profile</h2>
+            <label for="profileName">Name:</label>
+            <input type="text" id="profileName" maxlength="16">
+            <h3>Choose your cat:</h3>
+            <div class="cat-photos">
+                <img src="cat.png" class="cat-photo" data-cat="cat.png">
+                <img src="https://cdn3.emoji.gg/emojis/7482-uwucat.png" class="cat-photo" data-cat="https://cdn3.emoji.gg/emojis/7482-uwucat.png">
+                <img src="https://cdn3.emoji.gg/emojis/3301-kitty-blush.png" class="cat-photo" data-cat="https://cdn3.emoji.gg/emojis/3301-kitty-blush.png">
+                <br>
+                <img src="https://emoji.gg/assets/emoji/5903-cute-cat.png" class="cat-photo" data-cat="https://emoji.gg/assets/emoji/5903-cute-cat.png">
+                <img src="https://cdn3.emoji.gg/emojis/8793-beluga.png" class="cat-photo" data-cat="https://cdn3.emoji.gg/emojis/8793-beluga.png">
+                <img src="https://cdn3.emoji.gg/emojis/5802-cat-wtf.png" class="cat-photo" data-cat="https://cdn3.emoji.gg/emojis/5802-cat-wtf.png">
+            </div>
+            <button id="saveProfile">Save</button>
+            
+            <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 2px solid #ff6fff;">
+                <h4 style="color: #fff; margin-bottom: 1rem;">Backup & Restore</h4>
+                <button id="downloadDataBtn" class="header-btn" style="margin: 0.5rem;">Download Save</button>
+                <label for="uploadDataInput" class="header-btn" style="cursor:pointer;display:inline-block;margin: 0.5rem;">Upload Save
+                    <input type="file" id="uploadDataInput" accept="application/json" style="display:none;">
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Achievements Modal -->
+    <div id="achievementsModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close" id="closeAchievements">&times;</span>
+            <h2>Achievements</h2>
+            <p style="color: #aaa; margin-bottom: 1rem;">Click unlocked achievements to activate them for bonus meows per click!</p>
+            <div id="achievementsModalList" class="achievements-modal-list">
+                <!-- Achievement items will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Kitten Lab Modal -->
+    <div id="kittenLabModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close" id="closeKittenLab">&times;</span>
+            <h2>
+                <span aria-hidden="true">
+                    <img src="https://cdn3.emoji.gg/emojis/36389-sparkly-gold-cat.png"
+                         alt=""
+                         style="width:1.5em; height:1.5em; vertical-align:middle; margin-right: 0.5em;">
+                </span>
+                Kitten Lab
+            </h2>
+            <p style="color: #aaa; margin-bottom: 1rem;">Advanced research to boost your meow empire!</p>
+            <div id="kittenLabContent" class="research-upgrades">
+                <p style="color: #aaa; font-style: italic; text-align: center; grid-column: 1 / -1;">No kitten research available yet. Keep playing to unlock new discoveries!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaderboard Modal -->
+    <div id="leaderboardModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close" id="closeLeaderboard">&times;</span>
+            <h2>Leaderboard</h2>
+            <ol id="leaderboardList"></ol>
+        </div>
+    </div>
+
+    <!-- Prestige Confirmation Modal -->
+    <div id="prestigeConfirmModal" class="modal hidden">
+        <div class="modal-content prestige-confirm">
+            <div class="prestige-confirm-header">
+                <h2>✨ Prestige Confirmation ✨</h2>
+            </div>
+            <div class="prestige-confirm-body">
+                <div class="prestige-warning">
+                    <span class="warning-icon">⚠️</span>
+                    <p>Are you sure you want to prestige?</p>
+                </div>
+                <div class="prestige-rewards">
+                    <div class="reward-item">
+                        <span class="reward-icon">🌟</span>
+                        <span id="prestigeRewardText">You will gain X Heavenly Treats</span>
+                    </div>
+                </div>
+                <div class="prestige-consequences">
+                    <div class="consequence-item">
+                        <span class="consequence-icon">🔄</span>
+                        <span>All progress will be reset</span>
+                    </div>
+                    <div class="consequence-item">
+                        <span class="consequence-icon">💫</span>
+                        <span>Heavenly bonuses will be kept</span>
+                    </div>
+                    <div class="consequence-item">
+                        <span class="consequence-icon">⚡</span>
+                        <span>Future runs will be more powerful</span>
+                    </div>
+                </div>
+            </div>
+            <div class="prestige-confirm-buttons">
+                <button id="prestigeConfirmYes" class="prestige-confirm-btn prestige-yes">
+                    ✨ Yes, Prestige! ✨
+                </button>
+                <button id="prestigeConfirmNo" class="prestige-confirm-btn prestige-no">
+                    ❌ Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getDatabase, ref, set, get, onValue } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAy3ebbhkexhmNKm5FaSuX-_yPxRDctHag",
+            authDomain: "meow-clicker.firebaseapp.com",
+            databaseURL: "https://meow-clicker-default-rtdb.firebaseio.com",
+            projectId: "meow-clicker",
+            storageBucket: "meow-clicker.firebasestorage.app",
+            messagingSenderId: "38484030075",
+            appId: "1:38484030075:web:d68da3a9fbd15c151968de"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // Make Firebase available globally
+        window.firebase = { database, ref, set, get, onValue };
+    </script>
+    <script src="script.js"></script>
+</body>
+</html>
