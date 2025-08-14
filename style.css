@@ -142,6 +142,23 @@
 
 /* Mobile responsive adjustments */
 @media (max-width: 768px) {
+    /* Prevent horizontal scrolling on mobile */
+    html, body {
+        overflow-x: hidden !important;
+        max-width: 100vw !important;
+    }
+    
+    /* Reset any problematic min-widths */
+    * {
+        min-width: 0 !important;
+        max-width: 100% !important;
+    }
+    
+    /* Allow specific elements to have their intended min-widths */
+    button, .btn, .upgrade-btn, .header-btn {
+        min-width: auto !important;
+    }
+    
     .research-upgrades {
         gap: 0.75rem;
     }
@@ -158,6 +175,19 @@ html {
     background-size: 400% 400%;
     animation: gradientShift 15s ease infinite;
     min-height: 100%;
+    overflow-x: hidden;
+    max-width: 100vw;
+}
+
+/* Prevent any element from causing horizontal scroll */
+* {
+    box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+    max-width: 100%;
 }
 
 body {
@@ -171,6 +201,7 @@ body {
     position: relative;
     overflow-x: hidden;
     padding-top: 0;
+    max-width: 100vw;
 }
 
 body::before {
@@ -1063,6 +1094,28 @@ body::before {
 
 /* Extra small mobile devices */
 @media (max-width: 480px) {
+    #leaderboardList {
+        font-size: 0.8rem;
+        max-height: 200px;
+    }
+    
+    #leaderboardList li {
+        padding: 0.4rem;
+        gap: 0.3rem;
+    }
+    
+    #leaderboardList img {
+        width: 24px;
+        height: 24px;
+    }
+    
+    /* Even shorter usernames on very small screens */
+    #leaderboardList li span {
+        max-width: 80px;
+        font-size: 0.85rem;
+    }
+    
+    /* Golden Paw and other elements */
     /* Ensure background consistency on very small screens */
     html {
         background: linear-gradient(135deg, #0a0a0a 0%, #1a0d2e 25%, #2d1b69 50%, #0f0f23 75%, #000 100%) !important;
@@ -1235,6 +1288,36 @@ body::before {
     #leaderboardList {
         max-height: 250px;
         font-size: 0.9rem;
+    }
+    
+    #leaderboardList li {
+        padding: 0.5rem;
+        border-radius: 8px;
+        margin-bottom: 0.3rem;
+        flex-wrap: nowrap;
+        overflow: hidden;
+    }
+    
+    #leaderboardList img {
+        width: 28px;
+        height: 28px;
+        flex-shrink: 0;
+    }
+    
+    /* Truncate long usernames on mobile */
+    #leaderboardList li span {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 120px;
+        display: inline-block;
+    }
+    
+    /* Make sure numbers don't get cut off */
+    #leaderboardList li::after {
+        white-space: nowrap;
+        flex-shrink: 0;
+        margin-left: auto;
     }
     
     /* Golden Paw mobile optimization for small screens */
