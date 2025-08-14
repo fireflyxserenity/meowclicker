@@ -112,7 +112,7 @@
 }
 
 .research-upgrade-btn:hover:not([disabled]):not(.disabled) {
-    transform: translateY(-2px);
+    transform: translateY(-1px);
     box-shadow: 
         0 0 30px rgba(255, 20, 147, 0.6),
         0 0 60px rgba(0, 255, 255, 0.4),
@@ -142,6 +142,21 @@
 
 /* Mobile responsive adjustments */
 @media (max-width: 768px) {
+    /* Research buttons mobile improvements */
+    .research-upgrade-btn {
+        padding: 1rem;
+        font-size: 0.9rem;
+        min-height: 70px;
+        border-radius: 12px;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+    }
+    
+    .research-upgrade-btn:active {
+        transform: scale(0.98);
+        transition: transform 0.1s ease;
+    }
+    
     /* Prevent horizontal scrolling on mobile */
     html, body {
         overflow-x: hidden !important;
@@ -243,6 +258,7 @@ body::before {
     top: 0;
     z-index: 1000;
     margin-top: 0;
+    overflow: hidden;
 }
 
 .header::before {
@@ -254,6 +270,7 @@ body::before {
     height: 1px;
     background: linear-gradient(90deg, transparent, #ff1493, #00ffff, #ff1493, transparent);
     animation: borderGlow 3s ease-in-out infinite;
+    z-index: -1;
 }
 
 @keyframes borderGlow {
@@ -407,7 +424,16 @@ body::before {
     transition: all 0.3s ease;
     font-family: 'Quicksand', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     position: relative;
-    overflow: visible;
+    overflow: hidden;
+    z-index: 2;
+}
+
+/* Icon-only buttons styling */
+.header-btn.icon-only {
+    min-width: 50px;
+    padding: 0.7rem; /* Match mobile padding for consistency */
+    font-size: 1.2rem;
+    text-align: center;
 }
 
 .header-btn::before {
@@ -417,8 +443,10 @@ body::before {
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
     transition: left 0.5s ease;
+    z-index: 1;
+    border-radius: 20px;
 }
 
 .header-btn:hover::before {
@@ -464,30 +492,6 @@ body::before {
 
 .button-group:last-child::after {
     display: none;
-}
-
-/* Special styling for prestige button */
-.prestige-btn {
-    background: linear-gradient(135deg, #ffd700 0%, #ff8c00 50%, #ff1493 100%) !important;
-    color: #ffffff !important;
-    box-shadow: 
-        0 0 25px rgba(255, 215, 0, 0.8),
-        0 0 50px rgba(255, 140, 0, 0.6),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
-    animation: prestigeGlow 2s ease-in-out infinite;
-}
-
-.prestige-btn:hover {
-    background: linear-gradient(135deg, #ffed4e 0%, #ffa500 50%, #ff69b4 100%) !important;
-    box-shadow: 
-        0 0 35px rgba(255, 215, 0, 1),
-        0 0 70px rgba(255, 140, 0, 0.8),
-        0 8px 32px rgba(0, 0, 0, 0.3) !important;
-}
-
-.prestige-btn:active {
-    background: linear-gradient(135deg, #ff8c00 0%, #ffd700 50%, #ff1493 100%) !important;
-    color: #ffffff !important;
 }
 
 @keyframes prestigeGlow {
@@ -929,6 +933,8 @@ body::before {
         -moz-user-select: none;
         -ms-user-select: none;
         user-select: none;
+        /* Prevent pull-to-refresh */
+        overscroll-behavior-y: contain;
         /* Force the same background as desktop */
         background: linear-gradient(135deg, #0a0a0a 0%, #1a0d2e 25%, #2d1b69 50%, #0f0f23 75%, #000 100%) !important;
         background-size: 400% 400% !important;
@@ -964,17 +970,22 @@ body::before {
     }
     
     .header {
-        padding: 0.8rem 1rem;
+        padding: 1rem;
         flex-direction: column;
-        gap: 0.6rem;
+        gap: 1rem;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
     }
     
     .header-right {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.3rem;
+        gap: 0.5rem;
         justify-content: center;
         width: 100%;
+        max-width: 400px;
+        margin: 0 auto;
     }
     
     .title {
@@ -984,24 +995,32 @@ body::before {
     }
     
     .header-btn {
-        font-size: 0.8rem;
-        padding: 0.4rem 0.8rem;
+        font-size: 0.85rem;
+        padding: 0.7rem 1rem;
         margin-left: 0;
         touch-action: manipulation;
-        flex: 1;
-        min-width: 120px;
-        max-width: 140px;
+        min-width: 100px;
+        min-height: 44px; /* Apple's recommended minimum touch target */
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        min-height: 36px; /* Reduced minimum touch target */
-        border-radius: 15px;
+        border-radius: 12px;
+        -webkit-tap-highlight-color: transparent;
+        transition: all 0.3s ease;
+    }
+    
+    /* Icon-only buttons for responsive design */
+    .header-btn.icon-only {
+        min-width: 50px;
+        padding: 0.8rem;
+        font-size: 1.2rem;
+        text-align: center;
     }
     
     /* Mobile button groups */
     .button-group {
         margin-left: 0;
-        gap: 0.25rem;
+        gap: 0.5rem; /* Consistent spacing across all screen sizes */
     }
     
     .button-group::after {
@@ -1017,16 +1036,19 @@ body::before {
     .stats {
         display: flex;
         flex-direction: row;
-        gap: 0.2rem;
+        gap: 0.3rem;
         max-width: 95vw;
-        margin: 0.2rem auto 0.5rem auto;
-        padding: 0.2rem 0.3rem;
-        min-height: 26px;
-        font-size: 0.75rem;
+        margin: 0.5rem auto;
+        padding: 0.5rem;
+        min-height: 40px;
+        font-size: 0.8rem;
         justify-content: center;
         align-items: center;
         border: none;
         overflow: visible;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 15px;
+        backdrop-filter: blur(10px);
     }
     
     .stat { 
@@ -1048,9 +1070,9 @@ body::before {
     }
     
     .cat-btn {
-        width: 240px;
-        height: 240px;
-        margin: 1rem auto;
+        width: 260px;
+        height: 260px;
+        margin: 1.5rem auto;
         touch-action: manipulation;
         -webkit-tap-highlight-color: transparent;
         pointer-events: auto;
@@ -1058,9 +1080,14 @@ body::before {
         position: relative;
     }
     
+    .cat-btn:active {
+        transform: scale(0.95);
+        transition: transform 0.1s ease;
+    }
+    
     .cat-img {
-        width: 200px !important;
-        height: 200px !important;
+        width: 220px !important;
+        height: 220px !important;
         object-fit: cover !important;
         object-position: center !important;
         border-radius: 50% !important;
@@ -1084,8 +1111,15 @@ body::before {
     
     .upgrade-btn {
         font-size: 0.8rem;
-        padding: 0.8rem 1rem;
-        min-height: 60px;
+        padding: 1rem;
+        min-height: 72px; /* Better touch target size */
+        border-radius: 12px;
+        transition: all 0.2s ease;
+    }
+    
+    .upgrade-btn:active {
+        transform: scale(0.98); /* Better mobile feedback */
+        background: linear-gradient(135deg, #1a0036 0%, #181c2b 100%);
     }
     
     .upgrade-btn .upgrade-title {
@@ -1233,7 +1267,7 @@ body::before {
     }
     
     .header-right {
-        gap: 0.25rem;
+        gap: 0.5rem;
     }
     
     .header-btn {
@@ -1391,6 +1425,33 @@ body::before {
     }
 }
 
+/* Icon-only mode for smaller screens */
+@media (max-width: 600px) {
+    .header-btn.icon-only {
+        min-width: 44px !important;
+        max-width: 44px !important;
+        width: 44px !important;
+        padding: 0.7rem !important;
+        font-size: 1.1rem !important;
+        text-align: center;
+        border-radius: 10px;
+    }
+    
+    .header-right {
+        gap: 0.5rem !important;
+        display: flex !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+    }
+    
+    .button-group {
+        gap: 0.5rem !important;
+        margin-left: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+}
+
 .header-btn {
     background: linear-gradient(135deg, #ff6fff 0%, #00fff7 100%);
     color: #fff;
@@ -1504,7 +1565,7 @@ body::before {
 }
 
 .upgrade-btn:hover, .upgrade-btn:focus {
-    transform: translateY(-3px);
+    transform: translateY(-1px);
     background: linear-gradient(135deg, #ff1493 0%, #8a2be2 50%, #00ffff 100%);
     color: #ffffff;
     border-image: linear-gradient(45deg, #00ffff, #ff1493, #8a2be2) 1;
@@ -1608,24 +1669,15 @@ body::before {
     color: #181c2b;
     border: 2.5px solid #ff6fff;
     box-shadow: 0 0 32px #ff6fff, 0 0 48px #00fff7;
+    transform: translateY(-1px);
 }
 .upgrade-btn:active {
     background: linear-gradient(135deg, #1a0036 0%, #181c2b 100%);
     border: 2.5px solid #ff6fff;
-    animation: upgrade-btn-click 0.18s cubic-bezier(.4,2,.6,1) both;
+    transform: translateY(0px);
 }
 
-@keyframes upgrade-btn-click {
-    0% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(0.93);
-    }
-    100% {
-        transform: scale(1.07);
-    }
-}
+/* Removed jittery upgrade button animation */
 
 /* Modals */
 .modal {
@@ -2212,6 +2264,47 @@ body::before {
     transform: translateY(0);
     background: linear-gradient(135deg, #00ffff 0%, #8a2be2 50%, #ff1493 100%);
 }
+
+/* Backup & Restore buttons */
+.backup-btn {
+    background: linear-gradient(135deg, #ff1493 0%, #8a2be2 50%, #00ffff 100%);
+    color: #fff;
+    border: none;
+    border-radius: 15px;
+    padding: 0.7rem 1.5rem;
+    font-size: 1rem;
+    font-weight: bold;
+    box-shadow: 
+        0 0 15px rgba(255, 20, 147, 0.5),
+        0 0 30px rgba(0, 255, 255, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    font-family: 'Quicksand', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-width: 140px;
+    height: 44px;
+    box-sizing: border-box;
+}
+
+.backup-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+        0 0 25px rgba(255, 20, 147, 0.7),
+        0 0 50px rgba(0, 255, 255, 0.5),
+        0 6px 24px rgba(0, 0, 0, 0.3);
+    background: linear-gradient(135deg, #ff1493 0%, #8a2be2 30%, #00ffff 100%);
+}
+
+.backup-btn:active {
+    transform: translateY(0);
+    background: linear-gradient(135deg, #00ffff 0%, #8a2be2 50%, #ff1493 100%);
+}
+
 #leaderboardList {
     list-style: none !important;
     color: #ff6fff;
@@ -2399,6 +2492,12 @@ img.emoji {
 /* Make header button relative for notification positioning */
 .header-btn {
     position: relative;
+}
+
+/* Container for buttons with notifications */
+.btn-container {
+    position: relative;
+    display: inline-block;
 }
 
 /* Achievements modal specific styling */

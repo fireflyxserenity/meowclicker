@@ -1584,6 +1584,9 @@ function formatTime(seconds) {
     return `${hours} hour${hours > 1 ? 's' : ''} and ${minutes} minute${minutes > 1 ? 's' : ''}`;
 }
 
+// Initialize mobile enhancements
+setupModalTouchHandlers();
+
 // --- Profile ---
 function renderCatPicOptions() {
     catPhotosDiv.querySelectorAll('img').forEach((img, i) => {
@@ -1682,45 +1685,6 @@ function buyResearchUpgrade(upgradeId) {
 
 // Make buyResearchUpgrade globally accessible
 window.buyResearchUpgrade = buyResearchUpgrade;
-
-// Debug function for testing research
-window.testResearch = function() {
-    console.log('Current upgrades:', state.upgrades);
-    console.log('Available research:', state.research.availableUpgrades);
-    console.log('Purchased research:', state.research.unlockedUpgrades);
-    
-    // Add some upgrades for testing
-    state.upgrades[0] = 5; // 5 Kitten Helpers - should unlock first research
-    state.upgrades[1] = 3; // 3 Laser Pointers - should unlock second research
-    updateStats();
-    renderUpgrades();
-    console.log('After adding upgrades - Available research:', state.research.availableUpgrades);
-};
-
-// Quick function to add meows for testing
-window.addMeows = function(amount = 10000) {
-    state.meowCount += amount;
-    updateStats();
-    console.log(`Added ${amount} meows. Total: ${state.meowCount}`);
-};
-
-// Function to manually unlock first research for testing
-window.unlockFirstResearch = function() {
-    state.research.availableUpgrades.push('kitten_efficiency');
-    renderResearchUpgrades();
-    console.log('Manually unlocked first research');
-};
-
-// Test function to manually trigger button click
-window.testButtonClick = function() {
-    const btn = document.getElementById('research-kitten_efficiency');
-    if (btn) {
-        console.log('Found research button, attempting to click...');
-        btn.click();
-    } else {
-        console.log('Research button not found');
-    }
-};
 
 function getUnlockMessage(upgrade) {
     // Get human readable unlock condition
@@ -2495,8 +2459,10 @@ let clickBuffer = 0;
 let lastUpdateTime = 0;
 
 function handleCatClick() {
-    // Debug: Add console log for testing
-    console.log('Cat clicked!', Date.now());
+    // Enhanced mobile haptic feedback for cat clicks
+    if (navigator.vibrate) {
+        navigator.vibrate(25); // Light, quick vibration for cat clicks
+    }
     
     // Increment click buffer immediately for responsiveness
     clickBuffer++;
@@ -2538,14 +2504,12 @@ let touchStarted = false;
 catBtn.addEventListener('touchstart', (e) => {
     e.preventDefault(); // Prevent zoom and scrolling
     touchStarted = true;
-    console.log('Touch started');
     handleCatClick();
 }, { passive: false });
 
 catBtn.addEventListener('touchend', (e) => {
     e.preventDefault();
     touchStarted = false;
-    console.log('Touch ended');
 }, { passive: false });
 
 // Prevent context menu on long press (mobile)
@@ -3087,6 +3051,40 @@ catBtn.classList.toggle('millionaire-glow', hasMillion);
 
 // Initialize golden paw effects display
 updateEffectDisplay();
+
+// Mobile responsive button text
+function updateButtonTextForMobile() {
+    const isSmallScreen = window.innerWidth <= 600;
+    
+    const buttons = {
+        kittenLabBtn: { full: '🧪 Lab', icon: '🧪' },
+        achievementsBtn: { full: '🏆 Goals', icon: '🏆' },
+        prestigeBtn: { full: '✨ Prestige', icon: '✨' },
+        profileBtn: { full: '👤 Profile', icon: '👤' },
+        leaderboardBtn: { full: '📊 Ranks', icon: '📊' }
+    };
+    
+    Object.entries(buttons).forEach(([id, texts]) => {
+        const btn = document.getElementById(id);
+        if (btn) {
+            btn.textContent = isSmallScreen ? texts.icon : texts.full;
+            // Add/remove icon-only class for CSS styling
+            if (isSmallScreen) {
+                btn.classList.add('icon-only');
+                btn.title = texts.full; // Tooltip for accessibility
+            } else {
+                btn.classList.remove('icon-only');
+                btn.removeAttribute('title');
+            }
+            // Reapply Twemoji after text change
+            applyTwemoji(btn);
+        }
+    });
+}
+
+// Update button text on load and resize
+updateButtonTextForMobile();
+window.addEventListener('resize', updateButtonTextForMobile);
 
 window.addEventListener('beforeunload', saveState);
 // --- Responsive layout management ---

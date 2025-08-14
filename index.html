@@ -16,27 +16,31 @@
         <div class="header-right">
             <!-- Game Features Group -->
             <div class="button-group game-features">
-                <button id="kittenLabBtn" class="header-btn">
-                    🧪 Lab
+                <div class="btn-container">
+                    <button id="kittenLabBtn" class="header-btn" data-icon="🧪" data-text="Lab">
+                        🧪 Lab
+                    </button>
                     <span id="researchNotification" class="notification-badge hidden">!</span>
-                </button>
-                <button id="achievementsBtn" class="header-btn">
-                    🏆 Goals
+                </div>
+                <div class="btn-container">
+                    <button id="achievementsBtn" class="header-btn" data-icon="🏆" data-text="Goals">
+                        🏆 Goals
+                    </button>
                     <span id="achievementNotification" class="notification-badge hidden">!</span>
-                </button>
+                </div>
             </div>
             
             <!-- Meta Progression Group -->
             <div class="button-group meta-progression">
-                <button id="prestigeBtn" class="header-btn prestige-btn">
+                <button id="prestigeBtn" class="header-btn" data-icon="✨" data-text="Prestige" style="background: linear-gradient(135deg, #ffd700 0%, #ff8c00 50%, #ff1493 100%); box-shadow: 0 0 25px rgba(255, 215, 0, 0.8), 0 0 50px rgba(255, 140, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.3); animation: prestigeGlow 2s ease-in-out infinite;">
                     ✨ Prestige
                 </button>
             </div>
             
             <!-- Social Features Group -->
             <div class="button-group social-features">
-                <button id="profileBtn" class="header-btn">👤 Profile</button>
-                <button id="leaderboardBtn" class="header-btn">📊 Ranks</button>
+                <button id="profileBtn" class="header-btn" data-icon="👤" data-text="Profile">👤 Profile</button>
+                <button id="leaderboardBtn" class="header-btn" data-icon="📊" data-text="Ranks">📊 Ranks</button>
             </div>
         </div>
     </header>
@@ -111,11 +115,13 @@
             <button id="saveProfile">Save</button>
             
             <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 2px solid #ff6fff;">
-                <h4 style="color: #fff; margin-bottom: 1rem;">Backup & Restore</h4>
-                <button id="downloadDataBtn" class="header-btn" style="margin: 0.5rem;">Download Save</button>
-                <label for="uploadDataInput" class="header-btn" style="cursor:pointer;display:inline-block;margin: 0.5rem;">Upload Save
-                    <input type="file" id="uploadDataInput" accept="application/json" style="display:none;">
-                </label>
+                <h4 style="color: #fff; margin-bottom: 1rem; text-align: center;">Backup & Restore</h4>
+                <div style="display: flex; gap: 1rem; justify-content: center; align-items: center;">
+                    <button id="downloadDataBtn" class="backup-btn">Download Save</button>
+                    <label for="uploadDataInput" class="backup-btn">Upload Save
+                        <input type="file" id="uploadDataInput" accept="application/json" style="display:none;">
+                    </label>
+                </div>
             </div>
         </div>
     </div>
