@@ -2762,6 +2762,10 @@ async function renderLeaderboard() {
         board.forEach((u, i) => {
             const li = document.createElement('li');
             
+            // Create player info container
+            const playerInfo = document.createElement('div');
+            playerInfo.className = 'player-info';
+            
             // Add ranking with medals/numbers
             const rank = document.createElement('span');
             rank.style.fontWeight = 'bold';
@@ -2769,6 +2773,7 @@ async function renderLeaderboard() {
             rank.style.minWidth = '2rem';
             rank.style.display = 'inline-block';
             rank.style.textAlign = 'center';
+            rank.style.flexShrink = '0';
             
             if (i === 0) {
                 rank.textContent = '🥇';
@@ -2793,11 +2798,26 @@ async function renderLeaderboard() {
             img.src = validatePhotoPath(u.photo);
             img.onerror = () => { img.src = DEFAULT_CAT; };
             
+            const nameContainer = document.createElement('div');
+            nameContainer.className = 'player-name';
+            
             const name = document.createElement('b');
             name.textContent = u.name;
+            nameContainer.appendChild(name);
             
-            const span = document.createElement('span');
-            span.textContent = formatNumber(u.meows);
+            // Add prestige level if it exists
+            if (u.prestige > 0) {
+                const prestigeSpan = document.createElement('span');
+                prestigeSpan.textContent = ` (P${u.prestige})`;
+                prestigeSpan.style.color = '#ffd700';
+                prestigeSpan.style.fontSize = '0.85em';
+                prestigeSpan.style.fontWeight = 'bold';
+                nameContainer.appendChild(prestigeSpan);
+            }
+            
+            const scoreContainer = document.createElement('div');
+            scoreContainer.className = 'player-score';
+            scoreContainer.textContent = `${formatNumber(u.meows)} meows`;
             
             // Special styling for top 3
             if (i < 3) {
@@ -2821,24 +2841,13 @@ async function renderLeaderboard() {
                 name.textContent += ' (You)';
             }
             
-            li.appendChild(rank);
-            li.appendChild(img);
-            li.appendChild(document.createTextNode(' '));
-            li.appendChild(name);
+            // Assemble the structure
+            playerInfo.appendChild(rank);
+            playerInfo.appendChild(img);
+            playerInfo.appendChild(nameContainer);
             
-            // Add prestige level if it exists
-            if (u.prestige > 0) {
-                const prestigeSpan = document.createElement('span');
-                prestigeSpan.textContent = ` (P${u.prestige})`;
-                prestigeSpan.style.color = '#ffd700';
-                prestigeSpan.style.fontSize = '0.85em';
-                prestigeSpan.style.fontWeight = 'bold';
-                li.appendChild(prestigeSpan);
-            }
-            
-            li.appendChild(document.createTextNode(': '));
-            li.appendChild(span);
-            li.appendChild(document.createTextNode(' meows'));
+            li.appendChild(playerInfo);
+            li.appendChild(scoreContainer);
             leaderboardList.appendChild(li);
         });
         
