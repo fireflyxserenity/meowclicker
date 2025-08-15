@@ -3643,12 +3643,65 @@ function grantBonusGems() {
     closeSupportModal();
 }
 
-// Real web ad integration (Google AdSense) - placeholder for future implementation
+// Real web ad integration (Google AdSense)
 function showRealWebAd(rewardType) {
-    // This would integrate with Google AdSense or another web ad network
-    // For now, fall back to simulation
-    console.log('Real web ads not yet configured - using simulation');
-    showBrowserRewardedAd(rewardType);
+    // Check if AdSense is loaded and consent is given
+    if (window.adsbygoogle && window.adsbygoogle.loaded) {
+        try {
+            // Create AdSense rewarded ad container
+            const adContainer = document.createElement('div');
+            adContainer.innerHTML = `
+                <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+                           background: rgba(0,0,0,0.9); z-index: 10000; display: flex; 
+                           justify-content: center; align-items: center;">
+                    <div style="background: white; padding: 2rem; border-radius: 10px; text-align: center;">
+                        <h3>Loading Advertisement...</h3>
+                        <div style="margin: 1rem 0;">
+                            <!-- AdSense ad unit with your real ID -->
+                            <ins class="adsbygoogle"
+                                 style="display:block"
+                                 data-ad-client="ca-pub-3994230437494776"
+                                 data-ad-slot="AUTO"
+                                 data-ad-format="auto"
+                                 data-full-width-responsive="true"></ins>
+                        </div>
+                        <button onclick="closeWebAd()" style="padding: 0.5rem 1rem; margin-top: 1rem;">
+                            Close Ad
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(adContainer);
+            
+            // Push the ad
+            (adsbygoogle = window.adsbygoogle || []).push({});
+            
+            // Grant reward after a delay (simulating ad interaction)
+            setTimeout(() => {
+                grantReward(rewardType);
+                showAchievementBanner('🎉 Web ad completed! Reward granted!');
+            }, 3000);
+            
+        } catch (error) {
+            console.log('AdSense error, falling back to simulation:', error);
+            showBrowserRewardedAd(rewardType);
+        }
+    } else {
+        // AdSense not loaded or not approved yet - use simulation
+        console.log('AdSense not available - using simulation');
+        showBrowserRewardedAd(rewardType);
+    }
+}
+
+function closeWebAd() {
+    const adContainers = document.querySelectorAll('[style*="position: fixed"]');
+    adContainers.forEach(container => {
+        if (container.textContent.includes('Loading Advertisement') || 
+            container.textContent.includes('Close Ad')) {
+            container.remove();
+        }
+    });
 }
 
 function getRewardDescription(rewardType) {
