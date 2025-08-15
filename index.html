@@ -64,7 +64,48 @@
         <div class="stat"><span id="totalMeows">0</span><br>Total Meows</div>
         <div class="stat"><span id="meowsPerSecond">0</span><br>Meows/sec</div>
         <div class="stat"><span id="meowsPerClick">1</span><br>Meows/click</div>
+        <div class="stat premium-currency"><span id="totalGems">0</span><br>💎 Gems</div>
         <div class="stat"><span id="totalClicks">0</span><br>Total Clicks</div>
+    </section>
+
+    <!-- Rewarded Ad Section -->
+    <section class="rewarded-ads" style="margin: 1rem; text-align: center;">
+        <h3 style="color: #ffd700; margin-bottom: 1rem;">🎁 Watch Ads for Rewards!</h3>
+        <div class="ad-buttons" style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center;">
+            <button onclick="showRewardedAd('doubleCoins')" class="ad-btn" style="background: linear-gradient(45deg, #ff6b35, #f7931e); color: white; border: none; padding: 0.8rem 1rem; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.9rem;">
+                📺 2x Coins (30min)
+            </button>
+            <button onclick="showRewardedAd('freeGems')" class="ad-btn" style="background: linear-gradient(45deg, #9b59b6, #8e44ad); color: white; border: none; padding: 0.8rem 1rem; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.9rem;">
+                📺 +10 Gems
+            </button>
+            <button onclick="showRewardedAd('instantBuilding')" class="ad-btn" style="background: linear-gradient(45deg, #16a085, #27ae60); color: white; border: none; padding: 0.8rem 1rem; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.9rem;">
+                📺 Instant Build
+            </button>
+            <button onclick="showRewardedAd('rareCat')" class="ad-btn" style="background: linear-gradient(45deg, #e74c3c, #c0392b); color: white; border: none; padding: 0.8rem 1rem; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.9rem;">
+                📺 Rare Cat Lottery
+            </button>
+        </div>
+        
+        <!-- Booster Status Display -->
+        <div id="boosterStatus" style="margin-top: 1rem; padding: 0.5rem; background: rgba(0,0,0,0.2); border-radius: 8px; min-height: 2rem;">
+            <span style="color: #ffd700; font-weight: bold;">Active Boosters:</span>
+            <div id="activeBoostersDisplay" style="margin-top: 0.5rem; font-size: 0.9rem;">
+                No active boosters
+            </div>
+        </div>
+        
+        <!-- Collected Items Display -->
+        <div id="collectedItems" style="margin-top: 0.5rem; font-size: 0.9rem; color: #ccc;">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 0.5rem;">
+                <span>⚡ Instant Buildings: <span id="instantBuildingCount">0</span></span>
+                <span>🎰 Rare Cat Attempts: <span id="rareCatCount">0</span></span>
+            </div>
+            <div style="display: flex; gap: 0.5rem; justify-content: center;">
+                <button onclick="tryRareCatLottery()" style="background: linear-gradient(45deg, #e74c3c, #c0392b); color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.8rem;">
+                    🎰 Use Rare Cat Lottery
+                </button>
+            </div>
+        </div>
     </section>
 
     <main class="main-content">

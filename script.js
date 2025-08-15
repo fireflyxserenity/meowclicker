@@ -63,7 +63,14 @@ let state = {
     meowCount: 0,
     totalClicks: 0,
     meowsPerClick: 1,
+    gems: 0, // Premium currency for rewarded ads
     upgrades: [0, 0, 0, 0, 0, 0, 0, 0], // owned for each upgrade
+    // Rewarded ad boosters
+    boosters: {
+        doubleCoins: { active: false, expiresAt: 0 }, // 2x coins for 30 min
+        instantBuilding: 0, // number of instant building uses available
+        rareCatChances: 0 // number of rare cat lottery attempts
+    },
     achievements: {
         firstMeow: { unlocked: false, activated: false },
         hundredMeows: { unlocked: false, activated: false },
@@ -552,6 +559,7 @@ const totalMeowsSpan = document.getElementById('totalMeows');
 const meowsPerSecondSpan = document.getElementById('meowsPerSecond');
 const meowsPerClickSpan = document.getElementById('meowsPerClick');
 const totalClicksSpan = document.getElementById('totalClicks');
+const totalGemsSpan = document.getElementById('totalGems');
 const catBtn = document.getElementById('catButton');
 const mainCatImg = document.getElementById('mainCatImg');
 const upgradeBtns = [
@@ -2413,8 +2421,43 @@ function updateStats() {
     meowsPerClickSpan.textContent = formatNumber(effectiveMeowsPerClick);
     totalClicksSpan.textContent = formatNumber(state.totalClicks);
     
+    // Update gems display
+    const gemsSpan = document.getElementById('totalGems');
+    if (gemsSpan) gemsSpan.textContent = formatNumber(state.gems);
+    
+    // Update booster status display
+    updateBoosterDisplay();
+    
+    // Update collected items count
+    const instantBuildingCount = document.getElementById('instantBuildingCount');
+    const rareCatCount = document.getElementById('rareCatCount');
+    if (instantBuildingCount) instantBuildingCount.textContent = state.boosters.instantBuilding;
+    if (rareCatCount) rareCatCount.textContent = state.boosters.rareCatChances;
+    
     checkAchievements();
     renderResearchUpgrades(); // Check for new research upgrades
+}
+
+// Update booster status display
+function updateBoosterDisplay() {
+    const activeBoostersDisplay = document.getElementById('activeBoostersDisplay');
+    if (!activeBoostersDisplay) return;
+    
+    const boosters = [];
+    
+    // Check double coins booster
+    if (state.boosters.doubleCoins.active && Date.now() < state.boosters.doubleCoins.expiresAt) {
+        const timeLeft = Math.ceil((state.boosters.doubleCoins.expiresAt - Date.now()) / 60000); // minutes
+        boosters.push(`🪙 2x Coins (${timeLeft}m left)`);
+    }
+    
+    if (boosters.length === 0) {
+        activeBoostersDisplay.textContent = 'No active boosters';
+        activeBoostersDisplay.style.color = '#ccc';
+    } else {
+        activeBoostersDisplay.innerHTML = boosters.join('<br>');
+        activeBoostersDisplay.style.color = '#ffd700';
+    }
 }
 
 function updatePrestigeDisplay() {
@@ -2646,6 +2689,15 @@ function handleCatClick() {
         
         // Apply golden paw click multiplier
         effectiveMeowsPerClick *= state.goldenPaw.clickMultiplier;
+        
+        // Apply double coins booster from rewarded ads
+        if (state.boosters.doubleCoins.active && Date.now() < state.boosters.doubleCoins.expiresAt) {
+            effectiveMeowsPerClick *= 2;
+        } else if (state.boosters.doubleCoins.active && Date.now() >= state.boosters.doubleCoins.expiresAt) {
+            // Booster expired, deactivate it
+            state.boosters.doubleCoins.active = false;
+            showAchievementBanner('⏰ Double Coins bonus expired!');
+        }
         
         state.meowCount += clickBuffer * effectiveMeowsPerClick;
         clickBuffer = 0;
@@ -3267,9 +3319,152 @@ updateButtonTextForMobile();
 window.addEventListener('resize', updateButtonTextForMobile);
 
 window.addEventListener('beforeunload', saveState);
+
+// Initialize AdMob for real monetization
+initializeAdMob();
+
 // --- Responsive layout management ---
 // (Achievements section removed - no longer needed)
 }; // End of window.onload
+
+// === REAL ADMOB REWARDED VIDEO AD SYSTEM ===
+
+// Import AdMob plugin
+import { AdMob, RewardAdOptions, AdMobRewardItem } from '@capacitor-community/admob';
+
+// AdMob configuration - REPLACE WITH YOUR REAL AD UNIT IDS
+const AD_UNIT_IDS = {
+    // Test ad unit IDs (replace with your real ones from AdMob console)
+    rewardedAd: 'ca-app-pub-3940256099942544/5224354917', // Test rewarded ad
+    
+    // When you're ready for production, replace with your real ad unit IDs:
+    // rewardedAd: 'ca-app-pub-YOUR-PUBLISHER-ID/YOUR-REWARDED-AD-UNIT'
+};
+
+// Initialize AdMob
+async function initializeAdMob() {
+    try {
+        await AdMob.initialize({
+            testingDevices: ['YOUR_TESTING_DEVICE_ID'], // Add your device ID for testing
+            initializeForTesting: true, // Remove this for production
+        });
+        console.log('AdMob initialized successfully');
+    } catch (error) {
+        console.error('AdMob initialization failed:', error);
+    }
+}
+
+// Show real rewarded video ad
+async function showRewardedAd(rewardType) {
+    try {
+        showAchievementBanner('📺 Loading ad...');
+        
+        const options = {
+            adId: AD_UNIT_IDS.rewardedAd,
+            isTesting: true, // Set to false for production
+        };
+
+        // Prepare the ad
+        await AdMob.prepareRewardVideoAd(options);
+        
+        // Show the ad
+        const result = await AdMob.showRewardVideoAd();
+        
+        if (result && result.rewarded) {
+            // User watched the full ad, grant reward
+            grantReward(rewardType);
+            showAchievementBanner('🎉 Ad completed! Reward granted!');
+        } else {
+            showAchievementBanner('❌ Ad was not completed');
+        }
+        
+    } catch (error) {
+        console.error('Failed to show rewarded ad:', error);
+        
+        // Fallback: still grant reward for testing purposes
+        if (error.message && error.message.includes('test')) {
+            grantReward(rewardType);
+            showAchievementBanner('🧪 Test ad completed! Reward granted!');
+        } else {
+            showAchievementBanner('❌ Ad failed to load. Try again later.');
+        }
+    }
+}
+
+function getRewardDescription(rewardType) {
+    switch(rewardType) {
+        case 'doubleCoins': return '2x Coins for 30 minutes';
+        case 'freeGems': return '10 Free Gems';
+        case 'instantBuilding': return '1 Instant Building use';
+        case 'rareCat': return '1 Rare Cat Lottery attempt';
+        default: return 'Mystery Reward';
+    }
+}
+
+function grantReward(rewardType) {
+    switch(rewardType) {
+        case 'doubleCoins':
+            state.boosters.doubleCoins.active = true;
+            state.boosters.doubleCoins.expiresAt = Date.now() + (30 * 60 * 1000); // 30 minutes
+            showAchievementBanner('🎉 2x Coins activated for 30 minutes!');
+            break;
+            
+        case 'freeGems':
+            state.gems += 10;
+            showAchievementBanner('💎 +10 Gems earned!');
+            break;
+            
+        case 'instantBuilding':
+            state.boosters.instantBuilding += 1;
+            showAchievementBanner('⚡ +1 Instant Building use!');
+            break;
+            
+        case 'rareCat':
+            state.boosters.rareCatChances += 1;
+            showAchievementBanner('🎰 +1 Rare Cat Lottery attempt!');
+            break;
+    }
+    updateStats();
+    saveState();
+}
+
+// Function to use instant building booster
+function useInstantBuilding(upgradeIndex) {
+    if (state.boosters.instantBuilding <= 0) {
+        showAchievementBanner('❌ No instant building uses available!');
+        return false;
+    }
+    
+    state.boosters.instantBuilding--;
+    showAchievementBanner('⚡ Building completed instantly!');
+    saveState();
+    return true;
+}
+
+// Function for rare cat lottery
+function tryRareCatLottery() {
+    if (state.boosters.rareCatChances <= 0) {
+        showAchievementBanner('❌ No rare cat attempts available!');
+        return;
+    }
+    
+    state.boosters.rareCatChances--;
+    
+    // 30% chance for rare reward
+    const random = Math.random();
+    if (random < 0.3) {
+        const bonus = Math.floor(state.meowCount * 0.1); // 10% of current meows
+        state.meowCount += bonus;
+        showAchievementBanner(`🐱✨ Rare Cat found! +${formatNumber(bonus)} meows!`);
+    } else {
+        const smallBonus = Math.floor(state.meowCount * 0.02); // 2% consolation prize
+        state.meowCount += smallBonus;
+        showAchievementBanner(`🐱 Common cat found! +${formatNumber(smallBonus)} meows!`);
+    }
+    
+    updateStats();
+    saveState();
+}
 
 // Create footer with user credit
 const footer = document.createElement('footer');
