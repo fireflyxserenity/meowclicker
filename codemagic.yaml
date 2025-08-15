@@ -1,0 +1,30 @@
+workflows:
+  meow-clicker-workflow:
+    name: Meow Clicker Build
+    max_build_duration: 60
+    environment:
+      node: 18
+      npm: latest
+    scripts:
+      - name: Install dependencies
+        script: npm install
+      - name: Build web assets
+        script: |
+          cp *.html www/
+          cp *.css www/
+          cp *.js www/
+          cp *.png www/
+          cp *.json www/
+      - name: Sync Capacitor
+        script: npx cap sync
+    artifacts:
+      - android/app/build/outputs/**/*.apk
+      - ios/App/build/App.ipa
+    publishing:
+      google_play:
+        credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+        track: internal
+      app_store_connect:
+        api_key: $APP_STORE_CONNECT_PRIVATE_KEY
+        key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
+        issuer_id: $APP_STORE_CONNECT_ISSUER_ID

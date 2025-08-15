@@ -1,0 +1,30 @@
+{
+  "name": "meow-clicker-app",
+  "version": "1.0.0",
+  "description": "Meow Clicker - Cat clicking game with prestige system",
+  "main": "index.html",
+  "scripts": {
+    "serve": "npx http-server -p 8080 -c-1",
+    "serve-https": "npx http-server -p 8443 -S -C cert.pem -K key.pem",
+    "build-pwa": "npx workbox generateSW workbox-config.js",
+    "setup-capacitor": "npx cap init MeowClicker com.yourname.meowclicker",
+    "add-platforms": "npx cap add ios && npx cap add android",
+    "build-mobile": "npx cap copy && npx cap sync"
+  },
+  "keywords": [
+    "game",
+    "clicker",
+    "cat",
+    "mobile",
+    "pwa"
+  ],
+  "author": "fireflyxserenity",
+  "license": "ISC",
+  "devDependencies": {
+    "@capacitor/android": "^5.7.8",
+    "@capacitor/cli": "^5.0.0",
+    "@capacitor/core": "^5.0.0",
+    "@capacitor/ios": "^5.7.8",
+    "http-server": "^14.1.1"
+  }
+}

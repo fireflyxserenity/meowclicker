@@ -1,0 +1,26 @@
+/* Add this to your existing style.css for better mobile app experience */
+
+/* PWA specific improvements */
+@media (display-mode: standalone) {
+    /* When running as installed PWA */
+    body {
+        user-select: none; /* Prevent text selection like native app */
+        -webkit-touch-callout: none; /* Disable callout on iOS */
+    }
+    
+    .header {
+        padding-top: env(safe-area-inset-top, 0); /* Handle notch/status bar */
+    }
+}
+
+/* Prevent zoom on double tap (mobile app behavior) */
+* {
+    touch-action: manipulation;
+}
+
+/* Better mobile app feel */
+button, .cat-btn {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none;
+    user-select: none;
+}
