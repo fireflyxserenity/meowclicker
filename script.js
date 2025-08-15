@@ -34,12 +34,12 @@ if (uploadDataInput) {
                     setMainCatSrc(validatePhotoPath(state.profile.photo));
                     profileNameInput.value = state.profile.name;
                     saveState();
-                    alert('Data loaded!');
+                    showAchievementBanner('✅ Save data loaded successfully!');
                 } else {
-                    alert('Invalid save file.');
+                    showAchievementBanner('❌ Invalid save file format.');
                 }
             } catch {
-                alert('Invalid save file.');
+                showAchievementBanner('❌ Could not read save file.');
             }
         };
         reader.readAsText(file);
@@ -83,6 +83,7 @@ let state = {
         photo: 'cat.png'
     },
     lastActive: Date.now(),
+    accountCreated: Date.now(), // Track when account was first created
     globalLeaderboardOptIn: false, // Track if user has joined global leaderboard
     // Golden Cat Paw system
     goldenPaw: {
@@ -592,6 +593,12 @@ const prestigeContent = document.getElementById('prestigeContent');
 // Sections for responsive reordering
 const upgradesSection = document.querySelector('.upgrades');
 const catClickerSection = document.querySelector('.cat-clicker');
+
+// Lifetime Statistics elements
+const viewLifetimeStatsBtn = document.getElementById('viewLifetimeStatsBtn');
+const lifetimeStatsModal = document.getElementById('lifetimeStatsModal');
+const closeLifetimeStats = document.getElementById('closeLifetimeStats');
+const lifetimeStatsContent = document.getElementById('lifetimeStatsContent');
 
 // Research/upgrade DOM elements
 const kittenLabContent = document.getElementById('kittenLabContent');
@@ -2062,6 +2069,165 @@ function updateResearchNotification() {
     }
 }
 
+// --- Lifetime Statistics ---
+function renderLifetimeStats() {
+    if (!lifetimeStatsContent) return;
+    
+    try {
+        // Calculate total buildings owned across all categories
+        const totalBuildings = state.upgrades.reduce((sum, count) => sum + count, 0);
+        
+        // Calculate total achievements unlocked and activated
+        const achievementStats = Object.values(state.achievements).reduce((acc, achievement) => {
+            if (achievement.unlocked) acc.unlocked++;
+            if (achievement.activated) acc.activated++;
+            return acc;
+        }, { unlocked: 0, activated: 0 });
+        
+        // Calculate total achievement rewards earned
+        const totalAchievementRewards = Object.keys(achievements).reduce((sum, id) => {
+            if (state.achievements[id]?.activated) {
+                return sum + achievements[id].reward;
+            }
+            return sum;
+        }, 0);
+        
+        // Calculate research upgrades owned
+        const researchStats = {
+            owned: state.research?.unlockedUpgrades?.length || 0,
+            available: state.research?.availableUpgrades?.length || 0
+        };
+        
+        // Calculate time-based statistics
+        const currentTime = Date.now();
+        const accountAge = currentTime - (state.accountCreated || currentTime);
+        const accountAgeInDays = Math.floor(accountAge / (1000 * 60 * 60 * 24));
+        
+        // Fix session time calculation - track when this session started
+        if (!state.sessionStartTime) {
+            state.sessionStartTime = currentTime;
+        }
+        const currentSessionTime = currentTime - state.sessionStartTime;
+        const sessionMinutes = Math.floor(currentSessionTime / (1000 * 60));
+        
+        // Only show buildings that are owned (simplified)
+        const ownedBuildings = state.upgrades
+            .map((count, index) => ({ name: upgrades[index].name, count }))
+            .filter(building => building.count > 0);
+        
+        lifetimeStatsContent.innerHTML = `
+            <div class="stats-category">
+                <h3>🎯 Core Progress</h3>
+                <div class="stat-item">
+                    <span class="stat-label">Current Meows</span>
+                    <span class="stat-value">${formatNumber(state.meowCount)}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Total Meows Ever</span>
+                    <span class="stat-value highlight">${formatNumber(state.prestige?.totalMeowsEver || state.meowCount)}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Total Clicks</span>
+                    <span class="stat-value">${formatNumber(state.totalClicks)}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Current Meows/Click</span>
+                    <span class="stat-value">${formatNumber(state.meowsPerClick)}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Current Meows/Second</span>
+                    <span class="stat-value">${formatNumber(meowsPerSecond)}</span>
+                </div>
+            </div>
+            
+            <div class="stats-category">
+                <h3>🏢 Building Empire</h3>
+                <div class="stat-item">
+                    <span class="stat-label">Total Buildings</span>
+                    <span class="stat-value highlight">${formatNumber(totalBuildings)}</span>
+                </div>
+                ${ownedBuildings.map(building => `
+                    <div class="stat-item">
+                        <span class="stat-label">${building.name}</span>
+                        <span class="stat-value">${formatNumber(building.count)}</span>
+                    </div>
+                `).join('')}
+            </div>
+            
+            <div class="stats-category">
+                <h3>🏆 Achievements</h3>
+                <div class="stat-item">
+                    <span class="stat-label">Unlocked</span>
+                    <span class="stat-value achievement">${achievementStats.unlocked}/${Object.keys(achievements).length}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Activated</span>
+                    <span class="stat-value achievement">${achievementStats.activated}/${Object.keys(achievements).length}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Total Bonus Meows/Click</span>
+                    <span class="stat-value highlight">+${formatNumber(totalAchievementRewards)}</span>
+                </div>
+            </div>
+            
+            <div class="stats-category">
+                <h3>✨ Prestige System</h3>
+                <div class="stat-item">
+                    <span class="stat-label">Prestige Level</span>
+                    <span class="stat-value prestige">${state.prestige?.level || 0}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Heavenly Treats</span>
+                    <span class="stat-value prestige">${formatNumber(state.prestige?.heavenlyTreats || 0)}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Prestige Upgrades</span>
+                    <span class="stat-value prestige">${state.prestige?.unlockedUpgrades?.length || 0}</span>
+                </div>
+            </div>
+            
+            <div class="stats-category">
+                <h3>🧪 Research Progress</h3>
+                <div class="stat-item">
+                    <span class="stat-label">Research Upgrades Owned</span>
+                    <span class="stat-value">${researchStats.owned}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Available Research</span>
+                    <span class="stat-value">${researchStats.available}</span>
+                </div>
+            </div>
+            
+            <div class="stats-category">
+                <h3>⏰ Player Info</h3>
+                <div class="stat-item">
+                    <span class="stat-label">Account Age</span>
+                    <span class="stat-value">${accountAgeInDays > 0 ? `${accountAgeInDays} days` : 'New player!'}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Current Session</span>
+                    <span class="stat-value">${sessionMinutes} minutes</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Player Name</span>
+                    <span class="stat-value highlight">${state.profile?.name || 'Cat Lover'}</span>
+                </div>
+            </div>
+        `;
+    } catch (error) {
+        console.error('Error rendering lifetime stats:', error);
+        lifetimeStatsContent.innerHTML = `
+            <div class="stats-category">
+                <h3>❌ Error</h3>
+                <div class="stat-item">
+                    <span class="stat-label">Unable to load statistics</span>
+                    <span class="stat-value">Please try again</span>
+                </div>
+            </div>
+        `;
+    }
+}
+
 function renderAchievementsModal() {
     if (!achievementsModalList) return;
     
@@ -2984,21 +3150,29 @@ if (prestigeBtn && prestigeModal && closePrestige) {
         }
     };
 }
+if (viewLifetimeStatsBtn && lifetimeStatsModal && closeLifetimeStats) {
+    viewLifetimeStatsBtn.onclick = () => {
+        renderLifetimeStats();
+        lifetimeStatsModal.classList.remove('hidden');
+    };
+    closeLifetimeStats.onclick = () => lifetimeStatsModal.classList.add('hidden');
+}
 window.onclick = function(event) {
     if (profileModal && event.target === profileModal) profileModal.classList.add('hidden');
     if (leaderboardModal && event.target === leaderboardModal) leaderboardModal.classList.add('hidden');
     if (achievementsModal && event.target === achievementsModal) achievementsModal.classList.add('hidden');
     if (kittenLabModal && event.target === kittenLabModal) kittenLabModal.classList.add('hidden');
     if (prestigeModal && event.target === prestigeModal) prestigeModal.classList.add('hidden');
+    if (lifetimeStatsModal && event.target === lifetimeStatsModal) lifetimeStatsModal.classList.add('hidden');
 };
 
 // --- Initialization ---
 loadState();
 // Initialize Firebase connection status
 if (window.firebase) {
-    console.log('Firebase SDK loaded successfully');
+    // Firebase loaded successfully
 } else {
-    console.log('Firebase SDK not yet loaded, will retry when needed');
+    // Firebase SDK not yet loaded, will retry when needed
 }
 // Ensure state is properly initialized with all required fields
 if (!state.upgrades || state.upgrades.length < 8) {
@@ -3026,6 +3200,12 @@ if (typeof state.meowsPerClick !== 'number') state.meowsPerClick = 1;
 // Normalize saved photo path
 if (!state.profile) state.profile = { name: 'Cat Lover', photo: DEFAULT_CAT };
 state.profile.photo = validatePhotoPath(state.profile.photo);
+
+// Initialize account creation date if not set (for existing players)
+if (!state.accountCreated) state.accountCreated = Date.now();
+
+// Initialize session tracking
+if (!state.sessionStartTime) state.sessionStartTime = Date.now();
 
 // Apply prestige bonuses on startup
 const prestigeMultipliers = getTotalPrestigeMultiplier();

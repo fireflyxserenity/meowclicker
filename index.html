@@ -115,6 +115,13 @@
             <button id="saveProfile">Save</button>
             
             <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 2px solid #ff6fff;">
+                <h4 style="color: #fff; margin-bottom: 1rem; text-align: center;">Lifetime Statistics</h4>
+                <div style="display: flex; gap: 1rem; justify-content: center; align-items: center; margin-bottom: 1.5rem;">
+                    <button id="viewLifetimeStatsBtn" class="backup-btn">📊 View All-Time Data</button>
+                </div>
+            </div>
+            
+            <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 2px solid #ff6fff;">
                 <h4 style="color: #fff; margin-bottom: 1rem; text-align: center;">Backup & Restore</h4>
                 <div style="display: flex; gap: 1rem; justify-content: center; align-items: center;">
                     <button id="downloadDataBtn" class="backup-btn">Download Save</button>
@@ -122,6 +129,18 @@
                         <input type="file" id="uploadDataInput" accept="application/json" style="display:none;">
                     </label>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lifetime Statistics Modal -->
+    <div id="lifetimeStatsModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close" id="closeLifetimeStats">&times;</span>
+            <h2>📊 Lifetime Statistics</h2>
+            <p style="color: #aaa; margin-bottom: 1.5rem; text-align: center;">Your complete journey from the beginning of time!</p>
+            <div id="lifetimeStatsContent" class="lifetime-stats-content">
+                <!-- Statistics will be populated by JavaScript -->
             </div>
         </div>
     </div>
