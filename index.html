@@ -1,329 +1,111 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="google-adsense-account" content="ca-pub-3994230437494776">
-    <title>Meow Clicker</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/twemoji@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
-    
-    <!-- Google AdSense - Site Ownership Verification & Integration -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3994230437494776"
-         crossorigin="anonymous"></script>
-    
-    <!-- Google CMP (Consent Management) - Automatically loads when AdSense is active -->
-    <!-- This handles GDPR/CCPA compliance automatically -->
-    
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#ff6fff">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Meow Clicker">
-    <link rel="apple-touch-icon" href="cat.png">
-</head>
-<body>
-    <header class="header">
-        <div class="header-left">
-            <h1 class="title">MEOW CLICKER</h1>
-        </div>
-        <div class="header-right">
-            <!-- Game Features Group -->
-            <div class="button-group game-features">
-                <div class="btn-container">
-                    <button id="kittenLabBtn" class="header-btn" data-icon="🧪" data-text="Lab">
-                        🧪 Lab
-                    </button>
-                    <span id="researchNotification" class="notification-badge hidden">!</span>
-                </div>
-                <div class="btn-container">
-                    <button id="achievementsBtn" class="header-btn" data-icon="🏆" data-text="Goals">
-                        🏆 Goals
-                    </button>
-                    <span id="achievementNotification" class="notification-badge hidden">!</span>
-                </div>
-            </div>
-            
-            <!-- Meta Progression Group -->
-            <div class="button-group meta-progression">
-                <button id="prestigeBtn" class="header-btn" data-icon="✨" data-text="Prestige" style="background: linear-gradient(135deg, #ffd700 0%, #ff8c00 50%, #ff1493 100%); box-shadow: 0 0 25px rgba(255, 215, 0, 0.8), 0 0 50px rgba(255, 140, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.3); animation: prestigeGlow 2s ease-in-out infinite;">
-                    ✨ Prestige
-                </button>
-            </div>
-            
-            <!-- Social Features Group -->
-            <div class="button-group social-features">
-                <button id="profileBtn" class="header-btn" data-icon="👤" data-text="Profile">👤 Profile</button>
-                <button id="leaderboardBtn" class="header-btn" data-icon="📊" data-text="Ranks">📊 Ranks</button>
-            </div>
-        </div>
-    </header>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Down for Maintenance</title>
+<style>
+  :root{
+    --bg1:#0f0c29;
+    --bg2:#302b63;
+    --bg3:#24243e;
+    --neon1:#00f5ff;  /* aqua */
+    --neon2:#ff6bff;  /* pink */
+    --neon3:#9bff8d;  /* mint */
+  }
 
-    <!-- Achievement notification banner -->
-    <div id="achievementBanner" class="achievement-banner hidden">
-        <span id="bannerText"></span>
-        <button id="closeBanner">&times;</button>
-    </div>
+  /* Reset + layout */
+  * { box-sizing: border-box; }
+  html, body {
+    height: 100%;
+    margin: 0;
+    font-family: "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+    color: white;
+    background: radial-gradient(1200px 800px at 20% 10%, #1a1636 0%, transparent 60%),
+                radial-gradient(1000px 700px at 80% 80%, #1a2942 0%, transparent 60%),
+                linear-gradient(135deg, var(--bg1), var(--bg2), var(--bg3));
+    overflow: hidden;
+  }
+  .wrap {
+    position: relative;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+  }
 
+  /* Floating sparkles (cute vibes) */
+  .sparkles {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    filter: drop-shadow(0 0 8px rgba(255,255,255,.65));
+  }
+  .sparkles i{
+    position: absolute;
+    font-style: normal;
+    opacity: .9;
+    animation: floaty linear infinite;
+    user-select: none;
+  }
+  /* Position a handful of sparkles */
+  .sparkles i:nth-child(1){ top:12%; left:16%; animation-duration: 12s; }
+  .sparkles i:nth-child(2){ top:22%; right:14%; animation-duration: 10s; }
+  .sparkles i:nth-child(3){ bottom:18%; left:10%; animation-duration: 14s; }
+  .sparkles i:nth-child(4){ bottom:24%; right:12%; animation-duration: 11s; }
+  .sparkles i:nth-child(5){ top:50%; left:6%;  animation-duration: 15s; }
+  .sparkles i:nth-child(6){ top:8%;  right:6%; animation-duration: 13s; }
+  .sparkles i:nth-child(7){ bottom:8%; left:50%; animation-duration: 12s; }
 
-    <section class="stats">
-        <div class="stat"><span id="totalMeows">0</span><br>Total Meows</div>
-        <div class="stat"><span id="meowsPerSecond">0</span><br>Meows/sec</div>
-        <div class="stat"><span id="meowsPerClick">1</span><br>Meows/click</div>
-        <div class="stat premium-currency"><span id="totalGems">0</span><br>💎 Gems</div>
-        <div class="stat"><span id="totalClicks">0</span><br>Total Clicks</div>
-    </section>
+  @keyframes floaty {
+    0%   { transform: translateY(0) scale(1); opacity:.9; }
+    50%  { transform: translateY(-12px) scale(1.05); opacity:1; }
+    100% { transform: translateY(0) scale(1); opacity:.9; }
+  }
 
-    <!-- Rewarded Ad Section -->
-    <section class="rewarded-ads" style="margin: 1rem; text-align: center;">
-        <h3 style="color: #ffd700; margin-bottom: 1rem;">🎁 Watch Ads for Rewards!</h3>
-        <div class="ad-buttons" style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center;">
-            <button onclick="showRewardedAd('doubleCoins')" class="ad-btn" style="background: linear-gradient(45deg, #ff6b35, #f7931e); color: white; border: none; padding: 0.8rem 1rem; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.9rem;">
-                📺 2x Coins (30min)
-            </button>
-            <button onclick="showRewardedAd('freeGems')" class="ad-btn" style="background: linear-gradient(45deg, #9b59b6, #8e44ad); color: white; border: none; padding: 0.8rem 1rem; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.9rem;">
-                📺 +10 Gems
-            </button>
-            <button onclick="showRewardedAd('instantBuilding')" class="ad-btn" style="background: linear-gradient(45deg, #16a085, #27ae60); color: white; border: none; padding: 0.8rem 1rem; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.9rem;">
-                📺 Instant Build
-            </button>
-            <button onclick="showRewardedAd('rareCat')" class="ad-btn" style="background: linear-gradient(45deg, #e74c3c, #c0392b); color: white; border: none; padding: 0.8rem 1rem; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.9rem;">
-                📺 Rare Cat Lottery
-            </button>
-        </div>
-        
-        <!-- Booster Status Display -->
-        <div id="boosterStatus" style="margin-top: 1rem; padding: 0.5rem; background: rgba(0,0,0,0.2); border-radius: 8px; min-height: 2rem;">
-            <span style="color: #ffd700; font-weight: bold;">Active Boosters:</span>
-            <div id="activeBoostersDisplay" style="margin-top: 0.5rem; font-size: 0.9rem;">
-                No active boosters
-            </div>
-        </div>
-        
-        <!-- Collected Items Display -->
-        <div id="collectedItems" style="margin-top: 0.5rem; font-size: 0.9rem; color: #ccc;">
-            <div style="display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 0.5rem;">
-                <span>⚡ Instant Buildings: <span id="instantBuildingCount">0</span></span>
-                <span>🎰 Rare Cat Attempts: <span id="rareCatCount">0</span></span>
-            </div>
-            <div style="display: flex; gap: 0.5rem; justify-content: center;">
-                <button onclick="tryRareCatLottery()" style="background: linear-gradient(45deg, #e74c3c, #c0392b); color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.8rem;">
-                    🎰 Use Rare Cat Lottery
-                </button>
-            </div>
-        </div>
-    </section>
+  /* Neon sign frame */
+  .sign {
+    position: relative;
+    padding: clamp(24px, 5vw, 48px) clamp(28px, 6vw, 64px);
+    border-radius: 20px;
+    border: 2px solid rgba(255,255,255,.15);
+    background: rgba(0,0,0,.35);
+    backdrop-filter: blur(6px);
+    box-shadow:
+      0 0 0 2px rgba(255,255,255,.06) inset,
+      0 0 30px rgba(0, 245, 255, .25),
+      0 0 60px rgba(255, 107, 255, .15);
+    text-align: center;
+    isolation: isolate;
+  }
 
-    <main class="main-content">
-        <div class="game-layout">
-            <div class="cat-clicker">
-                <button id="catButton" class="cat-btn" tabindex="0" role="button" aria-label="Click the cat to earn meows">
-                    <img id="mainCatImg" src="cat.png" alt="Cat" class="cat-img">
-                    <div id="catFallback">🐾 Cat</div>
-                </button>
-            </div>
-            <section class="upgrades">
-                <h2 class="upgrades-header">Upgrades</h2>
-                    <div class="upgrade-list">
-                        <button class="upgrade-btn" id="kittenHelper">Kitten Helper</button>
-                        <button class="upgrade-btn" id="laserPointer">Laser Pointer</button>
-                        <button class="upgrade-btn" id="catnipFarm">Catnip Farm</button>
-                        <button class="upgrade-btn" id="catTower">Cat Tower</button>
-                        <button class="upgrade-btn" id="catCafe">Cat Cafe</button>
-                        <button class="upgrade-btn" id="meowingMachine">Meowing Machine</button>
-                        <button class="upgrade-btn" id="catUniversity">Cat University</button>
-                        <button class="upgrade-btn" id="interdimensionalCatPortal">Interdimensional Cat Portal</button>
-                    </div>
-            </section>
-        </div>
-    </main>
-    </main>
+  /* Glowing corners */
+  .sign::before, .sign::after {
+    content:"";
+    position: absolute;
+    inset: -2px;
+    border-radius: 22px;
+    background:
+      conic-gradient(from 0deg,
+        var(--neon1), var(--neon2), var(--neon3), var(--neon1));
+    mask:
+      linear-gradient(#000 0 0) content-box, 
+      linear-gradient(#000 0 0);
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box, 
+      linear-gradient(#000 0 0);
+    padding: 2px;
+    opacity: .25;
+    z-index: -1;
+    animation: spin 16s linear infinite;
+  }
+  .sign::after{
+    filter: blur(14px);
+    opacity: .35;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
-    <!-- Prestige Modal -->
-    <div id="prestigeModal" class="modal hidden">
-        <div class="modal-content">
-            <span class="close" id="closePrestige">&times;</span>
-            <h2>✨ Prestige System ✨</h2>
-            <div id="prestigeContent">
-                <!-- Prestige content will be populated by JavaScript -->
-            </div>
-        </div>
-    </div>
-
-    <!-- Profile Modal -->
-    <div id="profileModal" class="modal hidden">
-        <div class="modal-content">
-            <span class="close" id="closeProfile">&times;</span>
-            <h2>Edit Profile</h2>
-            <label for="profileName">Name:</label>
-            <input type="text" id="profileName" maxlength="16">
-            <h3>Choose your cat:</h3>
-            <div class="cat-photos">
-                <img src="cat.png" class="cat-photo" data-cat="cat.png">
-                <img src="https://cdn3.emoji.gg/emojis/7482-uwucat.png" class="cat-photo" data-cat="https://cdn3.emoji.gg/emojis/7482-uwucat.png">
-                <img src="https://cdn3.emoji.gg/emojis/3301-kitty-blush.png" class="cat-photo" data-cat="https://cdn3.emoji.gg/emojis/3301-kitty-blush.png">
-                <br>
-                <img src="https://emoji.gg/assets/emoji/5903-cute-cat.png" class="cat-photo" data-cat="https://emoji.gg/assets/emoji/5903-cute-cat.png">
-                <img src="https://cdn3.emoji.gg/emojis/8793-beluga.png" class="cat-photo" data-cat="https://cdn3.emoji.gg/emojis/8793-beluga.png">
-                <img src="https://cdn3.emoji.gg/emojis/5802-cat-wtf.png" class="cat-photo" data-cat="https://cdn3.emoji.gg/emojis/5802-cat-wtf.png">
-            </div>
-            <button id="saveProfile">Save</button>
-            
-            <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 2px solid #ff6fff;">
-                <h4 style="color: #fff; margin-bottom: 1rem; text-align: center;">Lifetime Statistics</h4>
-                <div style="display: flex; gap: 1rem; justify-content: center; align-items: center; margin-bottom: 1.5rem;">
-                    <button id="viewLifetimeStatsBtn" class="backup-btn">📊 View All-Time Data</button>
-                </div>
-            </div>
-            
-            <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 2px solid #ff6fff;">
-                <h4 style="color: #fff; margin-bottom: 1rem; text-align: center;">Backup & Restore</h4>
-                <div style="display: flex; gap: 1rem; justify-content: center; align-items: center;">
-                    <button id="downloadDataBtn" class="backup-btn">Download Save</button>
-                    <label for="uploadDataInput" class="backup-btn">Upload Save
-                        <input type="file" id="uploadDataInput" accept="application/json" style="display:none;">
-                    </label>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Lifetime Statistics Modal -->
-    <div id="lifetimeStatsModal" class="modal hidden">
-        <div class="modal-content">
-            <span class="close" id="closeLifetimeStats">&times;</span>
-            <h2>📊 Lifetime Statistics</h2>
-            <p style="color: #aaa; margin-bottom: 1.5rem; text-align: center;">Your complete journey from the beginning of time!</p>
-            <div id="lifetimeStatsContent" class="lifetime-stats-content">
-                <!-- Statistics will be populated by JavaScript -->
-            </div>
-        </div>
-    </div>
-
-    <!-- Achievements Modal -->
-    <div id="achievementsModal" class="modal hidden">
-        <div class="modal-content">
-            <span class="close" id="closeAchievements">&times;</span>
-            <h2>Achievements</h2>
-            <p style="color: #aaa; margin-bottom: 1rem;">Click unlocked achievements to activate them for bonus meows per click!</p>
-            <div id="achievementsModalList" class="achievements-modal-list">
-                <!-- Achievement items will be populated here -->
-            </div>
-        </div>
-    </div>
-
-    <!-- Kitten Lab Modal -->
-    <div id="kittenLabModal" class="modal hidden">
-        <div class="modal-content">
-            <span class="close" id="closeKittenLab">&times;</span>
-            <h2>
-                <span aria-hidden="true">
-                    <img src="https://cdn3.emoji.gg/emojis/36389-sparkly-gold-cat.png"
-                         alt=""
-                         style="width:1.5em; height:1.5em; vertical-align:middle; margin-right: 0.5em;">
-                </span>
-                Kitten Lab
-            </h2>
-            <p style="color: #aaa; margin-bottom: 1rem;">Advanced research to boost your meow empire!</p>
-            <div id="kittenLabContent" class="research-upgrades">
-                <p style="color: #aaa; font-style: italic; text-align: center; grid-column: 1 / -1;">No kitten research available yet. Keep playing to unlock new discoveries!</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Leaderboard Modal -->
-    <div id="leaderboardModal" class="modal hidden">
-        <div class="modal-content">
-            <span class="close" id="closeLeaderboard">&times;</span>
-            <h2>Leaderboard</h2>
-            <ol id="leaderboardList"></ol>
-        </div>
-    </div>
-
-    <!-- Prestige Confirmation Modal -->
-    <div id="prestigeConfirmModal" class="modal hidden">
-        <div class="modal-content prestige-confirm">
-            <div class="prestige-confirm-header">
-                <h2>✨ Prestige Confirmation ✨</h2>
-            </div>
-            <div class="prestige-confirm-body">
-                <div class="prestige-warning">
-                    <span class="warning-icon">⚠️</span>
-                    <p>Are you sure you want to prestige?</p>
-                </div>
-                <div class="prestige-rewards">
-                    <div class="reward-item">
-                        <span class="reward-icon">🌟</span>
-                        <span id="prestigeRewardText">You will gain X Heavenly Treats</span>
-                    </div>
-                </div>
-                <div class="prestige-consequences">
-                    <div class="consequence-item">
-                        <span class="consequence-icon">🔄</span>
-                        <span>All progress will be reset</span>
-                    </div>
-                    <div class="consequence-item">
-                        <span class="consequence-icon">💫</span>
-                        <span>Heavenly bonuses will be kept</span>
-                    </div>
-                    <div class="consequence-item">
-                        <span class="consequence-icon">⚡</span>
-                        <span>Future runs will be more powerful</span>
-                    </div>
-                </div>
-            </div>
-            <div class="prestige-confirm-buttons">
-                <button id="prestigeConfirmYes" class="prestige-confirm-btn prestige-yes">
-                    ✨ Yes, Prestige! ✨
-                </button>
-                <button id="prestigeConfirmNo" class="prestige-confirm-btn prestige-no">
-                    ❌ Cancel
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Firebase SDK -->
-    <script type="module">
-        // Import Firebase modules
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getDatabase, ref, set, get, onValue } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
-
-        // Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyAy3ebbhkexhmNKm5FaSuX-_yPxRDctHag",
-            authDomain: "meow-clicker.firebaseapp.com",
-            databaseURL: "https://meow-clicker-default-rtdb.firebaseio.com",
-            projectId: "meow-clicker",
-            storageBucket: "meow-clicker.firebasestorage.app",
-            messagingSenderId: "38484030075",
-            appId: "1:38484030075:web:d68da3a9fbd15c151968de"
-        };
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const database = getDatabase(app);
-
-        // Make Firebase available globally
-        window.firebase = { database, ref, set, get, onValue };
-    </script>
-    <script src="script.js"></script>
-    
-    <!-- PWA Service Worker Registration -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then((registration) => {
-                        console.log('SW registered: ', registration);
-                    })
-                    .catch((registrationError) => {
-                        console.log('SW registration failed: ', registrationError);
-                    });
-            });
-        }
-    </script>
-</body>
-</html>
+  /* Main neon text */
+  h1 {
+    margin: 0;
+    font-size: clamp(28px, 8vw, 72px);
