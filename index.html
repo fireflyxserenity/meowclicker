@@ -109,3 +109,70 @@
   h1 {
     margin: 0;
     font-size: clamp(28px, 8vw, 72px);
+    letter-spacing: .08em;
+    font-weight: 800;
+    text-transform: uppercase;
+    background: linear-gradient(90deg, var(--neon1), var(--neon2), var(--neon3));
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: shimmer 6s ease-in-out infinite;
+    text-shadow:
+      0 0 8px rgba(0,245,255,.6),
+      0 0 18px rgba(255,107,255,.5),
+      0 0 36px rgba(155,255,141,.35);
+  }
+  @keyframes shimmer {
+    0%,100% { background-position: 0% 50%; }
+    50%     { background-position: 100% 50%; }
+  }
+
+  /* Cute subline (optional – remove if you only want the big text) */
+  .sub {
+    margin-top: 12px;
+    font-size: clamp(12px, 2.6vw, 16px);
+    opacity: .9;
+    text-shadow: 0 0 8px rgba(255,255,255,.3);
+  }
+
+  /* Tiny pulsing heart/cat paw for extra cuteness */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 18px;
+    font-size: clamp(12px, 2.6vw, 14px);
+    opacity: .95;
+  }
+  .dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--neon2);
+    box-shadow: 0 0 10px var(--neon2), 0 0 20px var(--neon2);
+    animation: pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%,100% { transform: scale(1); opacity: .9; }
+    50%     { transform: scale(1.25); opacity: 1; }
+  }
+
+  /* Accessibility: prefers-reduced-motion */
+  @media (prefers-reduced-motion: reduce){
+    .sparkles i, .sign::before, .sign::after, h1 { animation: none; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap" role="main" aria-label="Site is down for maintenance">
+    <div class="sparkles" aria-hidden="true">
+      <i>✦</i><i>❀</i><i>✦</i><i>☾</i><i>✧</i><i>❤</i><i>✦</i>
+    </div>
+
+    <div class="sign" aria-live="polite">
+      <h1>DOWN FOR MAINTENANCE</h1>
+      <div class="sub">back soon — thanks for your patience</div>
+      <div class="badge"><span class="dot" aria-hidden="true"></span> sending cozy vibes</div>
+    </div>
+  </div>
+</body>
+</html>
