@@ -3332,63 +3332,185 @@ initializeAdMob();
 // Import AdMob plugin
 import { AdMob, RewardAdOptions, AdMobRewardItem } from '@capacitor-community/admob';
 
-// AdMob configuration - REPLACE WITH YOUR REAL AD UNIT IDS
+// AdMob configuration - YOUR REAL AD UNIT IDS
 const AD_UNIT_IDS = {
-    // Test ad unit IDs (replace with your real ones from AdMob console)
-    rewardedAd: 'ca-app-pub-3940256099942544/5224354917', // Test rewarded ad
-    
-    // When you're ready for production, replace with your real ad unit IDs:
-    // rewardedAd: 'ca-app-pub-YOUR-PUBLISHER-ID/YOUR-REWARDED-AD-UNIT'
+    // Real ad unit ID from your AdMob console
+    rewardedAd: 'ca-app-pub-3994230437494776/4824024565', // MeowClicker Gem Rewards
 };
 
-// Initialize AdMob
+// Initialize AdMob (only on mobile platforms)
 async function initializeAdMob() {
+    if (!isMobileApp()) {
+        console.log('Running in browser - AdMob initialization skipped');
+        return;
+    }
+    
     try {
         await AdMob.initialize({
             testingDevices: ['YOUR_TESTING_DEVICE_ID'], // Add your device ID for testing
-            initializeForTesting: true, // Remove this for production
+            initializeForTesting: false, // PRODUCTION MODE - Real ads!
         });
-        console.log('AdMob initialized successfully');
+        console.log('AdMob initialized successfully with REAL ads');
     } catch (error) {
         console.error('AdMob initialization failed:', error);
     }
 }
 
-// Show real rewarded video ad
+// Detect if running in mobile app or browser
+function isMobileApp() {
+    return window.Capacitor && window.Capacitor.isNativePlatform();
+}
+
+// Show real rewarded video ad (works on all platforms)
 async function showRewardedAd(rewardType) {
     try {
         showAchievementBanner('📺 Loading ad...');
         
-        const options = {
-            adId: AD_UNIT_IDS.rewardedAd,
-            isTesting: true, // Set to false for production
-        };
+        if (isMobileApp()) {
+            // Mobile app: Use real AdMob with YOUR real ad unit
+            const options = {
+                adId: AD_UNIT_IDS.rewardedAd,
+                isTesting: false, // PRODUCTION MODE - Real ads!
+            };
 
-        // Prepare the ad
-        await AdMob.prepareRewardVideoAd(options);
-        
-        // Show the ad
-        const result = await AdMob.showRewardVideoAd();
-        
-        if (result && result.rewarded) {
-            // User watched the full ad, grant reward
-            grantReward(rewardType);
-            showAchievementBanner('🎉 Ad completed! Reward granted!');
+            // Prepare the ad
+            await AdMob.prepareRewardVideoAd(options);
+            
+            // Show the ad
+            const result = await AdMob.showRewardVideoAd();
+            
+            if (result && result.rewarded) {
+                // User watched the full ad, grant reward
+                grantReward(rewardType);
+                showAchievementBanner('🎉 Ad completed! Reward granted!');
+            } else {
+                showAchievementBanner('❌ Ad was not completed');
+            }
         } else {
-            showAchievementBanner('❌ Ad was not completed');
+            // Browser: Use web-compatible ad simulation
+            showBrowserRewardedAd(rewardType);
         }
         
     } catch (error) {
         console.error('Failed to show rewarded ad:', error);
         
-        // Fallback: still grant reward for testing purposes
-        if (error.message && error.message.includes('test')) {
-            grantReward(rewardType);
-            showAchievementBanner('🧪 Test ad completed! Reward granted!');
+        // Fallback for mobile apps
+        if (isMobileApp()) {
+            if (error.message && error.message.includes('test')) {
+                grantReward(rewardType);
+                showAchievementBanner('🧪 Test ad completed! Reward granted!');
+            } else {
+                showAchievementBanner('❌ Ad failed to load. Try again later.');
+            }
         } else {
-            showAchievementBanner('❌ Ad failed to load. Try again later.');
+            // Browser fallback
+            showBrowserRewardedAd(rewardType);
         }
     }
+}
+
+// Browser-compatible ad system (for web version)
+function showBrowserRewardedAd(rewardType) {
+    // Create a modal that simulates watching an ad
+    const adModal = document.createElement('div');
+    adModal.id = 'browserAdModal';
+    adModal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.9);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
+        color: white;
+        font-family: Arial, sans-serif;
+    `;
+    
+    const adDescription = getRewardDescription(rewardType);
+    let countdown = 5; // 5 second ad simulation
+    
+    adModal.innerHTML = `
+        <div style="text-align: center; max-width: 400px; padding: 2rem;">
+            <h2 style="color: #ffd700; margin-bottom: 1rem;">🎬 Advertisement</h2>
+            <p style="margin-bottom: 1rem;">Watch this ad to earn:</p>
+            <p style="color: #00fff7; font-weight: bold; font-size: 1.2rem; margin-bottom: 2rem;">${adDescription}</p>
+            
+            <div style="margin-bottom: 2rem;">
+                <div style="width: 300px; height: 200px; background: linear-gradient(45deg, #ff6b35, #f7931e); 
+                           display: flex; align-items: center; justify-content: center; border-radius: 10px; margin: 0 auto;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 3rem; margin-bottom: 0.5rem;">🎮</div>
+                        <div style="font-weight: bold;">Sample Advertisement</div>
+                        <div style="font-size: 0.9rem; opacity: 0.8;">This would be a real ad in the mobile app</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 1rem;">
+                <div id="adCountdown" style="font-size: 1.5rem; font-weight: bold; color: #ffd700;">
+                    Ad ends in: ${countdown}s
+                </div>
+            </div>
+            
+            <button id="skipAdBtn" style="
+                background: #666;
+                color: white;
+                border: none;
+                padding: 0.8rem 1.5rem;
+                border-radius: 8px;
+                font-size: 1rem;
+                cursor: not-allowed;
+                opacity: 0.5;
+            " disabled>
+                Skip Ad (${countdown}s)
+            </button>
+        </div>
+    `;
+    
+    document.body.appendChild(adModal);
+    
+    // Countdown timer
+    const countdownInterval = setInterval(() => {
+        countdown--;
+        const countdownElement = document.getElementById('adCountdown');
+        const skipButton = document.getElementById('skipAdBtn');
+        
+        if (countdownElement) {
+            countdownElement.textContent = `Ad ends in: ${countdown}s`;
+        }
+        
+        if (skipButton) {
+            skipButton.textContent = `Skip Ad (${countdown}s)`;
+            
+            if (countdown <= 0) {
+                // Ad completed
+                clearInterval(countdownInterval);
+                skipButton.textContent = 'Claim Reward!';
+                skipButton.style.background = 'linear-gradient(45deg, #27ae60, #16a085)';
+                skipButton.style.cursor = 'pointer';
+                skipButton.style.opacity = '1';
+                skipButton.disabled = false;
+                
+                skipButton.onclick = () => {
+                    document.body.removeChild(adModal);
+                    grantReward(rewardType);
+                    showAchievementBanner('🎉 Browser ad completed! Reward granted!');
+                };
+            }
+        }
+    }, 1000);
+    
+    // Close modal if clicked outside (only after ad completes)
+    adModal.onclick = (e) => {
+        if (e.target === adModal && countdown <= 0) {
+            document.body.removeChild(adModal);
+            clearInterval(countdownInterval);
+        }
+    };
 }
 
 function getRewardDescription(rewardType) {

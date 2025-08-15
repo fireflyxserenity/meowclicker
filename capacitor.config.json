@@ -3,10 +3,10 @@
   "appName": "Meow Clicker",
   "webDir": "www",
   "plugins": {
-    "AdMob": {
-      "appId": "ca-app-pub-3940256099942544~3347511713",
+    "@capacitor-community/admob": {
+      "appId": "ca-app-pub-3994230437494776~7290405800",
       "testingDevices": ["YOUR_TESTING_DEVICE_ID"],
-      "initializeForTesting": true
+      "initializeForTesting": false
     }
   }
 }
