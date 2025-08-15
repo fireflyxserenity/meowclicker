@@ -3411,7 +3411,13 @@ async function showRewardedAd(rewardType) {
 
 // Browser-compatible ad system (for web version)
 function showBrowserRewardedAd(rewardType) {
-    // Create a modal that simulates watching an ad
+    // Check if we can show real web ads (AdSense)
+    if (window.googletag && window.googletag.display) {
+        showRealWebAd(rewardType);
+        return;
+    }
+    
+    // Fallback: Enhanced simulation with optional donation
     const adModal = document.createElement('div');
     adModal.id = 'browserAdModal';
     adModal.style.cssText = `
@@ -3435,39 +3441,60 @@ function showBrowserRewardedAd(rewardType) {
     
     adModal.innerHTML = `
         <div style="text-align: center; max-width: 400px; padding: 2rem;">
-            <h2 style="color: #ffd700; margin-bottom: 1rem;">🎬 Advertisement</h2>
-            <p style="margin-bottom: 1rem;">Watch this ad to earn:</p>
-            <p style="color: #00fff7; font-weight: bold; font-size: 1.2rem; margin-bottom: 2rem;">${adDescription}</p>
+            <h2 style="color: #ffd700; margin-bottom: 1rem;">🎬 Support the Developer</h2>
+            <p style="margin-bottom: 1rem;">In the mobile app, this would be a real ad that generates revenue.</p>
+            <p style="color: #00fff7; font-weight: bold; font-size: 1.2rem; margin-bottom: 2rem;">
+                Earn: ${adDescription}
+            </p>
             
             <div style="margin-bottom: 2rem;">
                 <div style="width: 300px; height: 200px; background: linear-gradient(45deg, #ff6b35, #f7931e); 
                            display: flex; align-items: center; justify-content: center; border-radius: 10px; margin: 0 auto;">
                     <div style="text-align: center;">
                         <div style="font-size: 3rem; margin-bottom: 0.5rem;">🎮</div>
-                        <div style="font-weight: bold;">Sample Advertisement</div>
-                        <div style="font-size: 0.9rem; opacity: 0.8;">This would be a real ad in the mobile app</div>
+                        <div style="font-weight: bold;">Free Browser Version</div>
+                        <div style="font-size: 0.9rem; opacity: 0.8;">Download the mobile app for real ads!</div>
                     </div>
                 </div>
             </div>
             
             <div style="margin-bottom: 1rem;">
                 <div id="adCountdown" style="font-size: 1.5rem; font-weight: bold; color: #ffd700;">
-                    Ad ends in: ${countdown}s
+                    Waiting: ${countdown}s
                 </div>
             </div>
             
-            <button id="skipAdBtn" style="
-                background: #666;
-                color: white;
-                border: none;
-                padding: 0.8rem 1.5rem;
-                border-radius: 8px;
-                font-size: 1rem;
-                cursor: not-allowed;
-                opacity: 0.5;
-            " disabled>
-                Skip Ad (${countdown}s)
-            </button>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;">
+                <button id="skipAdBtn" style="
+                    background: #666;
+                    color: white;
+                    border: none;
+                    padding: 0.8rem 1.5rem;
+                    border-radius: 8px;
+                    font-size: 1rem;
+                    cursor: not-allowed;
+                    opacity: 0.5;
+                " disabled>
+                    Get Reward (${countdown}s)
+                </button>
+                
+                <button id="supportBtn" style="
+                    background: linear-gradient(45deg, #e74c3c, #c0392b);
+                    color: white;
+                    border: none;
+                    padding: 0.8rem 1.5rem;
+                    border-radius: 8px;
+                    font-size: 1rem;
+                    cursor: pointer;
+                    font-weight: bold;
+                " onclick="showSupportOptions()">
+                    💎 Support Developer
+                </button>
+            </div>
+            
+            <div style="margin-top: 1rem; font-size: 0.8rem; color: #aaa;">
+                Love the game? Consider supporting development!
+            </div>
         </div>
     `;
     
@@ -3480,11 +3507,11 @@ function showBrowserRewardedAd(rewardType) {
         const skipButton = document.getElementById('skipAdBtn');
         
         if (countdownElement) {
-            countdownElement.textContent = `Ad ends in: ${countdown}s`;
+            countdownElement.textContent = `Waiting: ${countdown}s`;
         }
         
         if (skipButton) {
-            skipButton.textContent = `Skip Ad (${countdown}s)`;
+            skipButton.textContent = `Get Reward (${countdown}s)`;
             
             if (countdown <= 0) {
                 // Ad completed
@@ -3498,7 +3525,7 @@ function showBrowserRewardedAd(rewardType) {
                 skipButton.onclick = () => {
                     document.body.removeChild(adModal);
                     grantReward(rewardType);
-                    showAchievementBanner('🎉 Browser ad completed! Reward granted!');
+                    showAchievementBanner('🎉 Browser reward claimed! Consider supporting the developer!');
                 };
             }
         }
@@ -3511,6 +3538,117 @@ function showBrowserRewardedAd(rewardType) {
             clearInterval(countdownInterval);
         }
     };
+}
+
+// Support options for browser users
+function showSupportOptions() {
+    const supportModal = document.createElement('div');
+    supportModal.id = 'supportModal';
+    supportModal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.9);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10001;
+        color: white;
+        font-family: Arial, sans-serif;
+    `;
+    
+    supportModal.innerHTML = `
+        <div style="background: linear-gradient(135deg, #2d1b69, #4b0082); padding: 2rem; border-radius: 15px; text-align: center; max-width: 400px; border: 2px solid #ffd700;">
+            <h2 style="color: #ffd700; margin-bottom: 1rem;">💎 Support Meow Clicker</h2>
+            <p style="margin-bottom: 1.5rem; line-height: 1.4;">
+                Love the game? Your support helps keep development going and adds new features!
+            </p>
+            
+            <div style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem;">
+                <button onclick="window.open('https://fireflydesigns.me', '_blank')" style="
+                    background: linear-gradient(45deg, #3498db, #2980b9);
+                    color: white;
+                    border: none;
+                    padding: 1rem;
+                    border-radius: 8px;
+                    font-size: 1rem;
+                    cursor: pointer;
+                    font-weight: bold;
+                ">
+                    🌟 Visit Developer Website
+                </button>
+                
+                <button onclick="openMobileAppInfo()" style="
+                    background: linear-gradient(45deg, #27ae60, #16a085);
+                    color: white;
+                    border: none;
+                    padding: 1rem;
+                    border-radius: 8px;
+                    font-size: 1rem;
+                    cursor: pointer;
+                    font-weight: bold;
+                ">
+                    📱 Download Mobile App (Real Ads!)
+                </button>
+                
+                <button onclick="grantBonusGems()" style="
+                    background: linear-gradient(45deg, #9b59b6, #8e44ad);
+                    color: white;
+                    border: none;
+                    padding: 1rem;
+                    border-radius: 8px;
+                    font-size: 1rem;
+                    cursor: pointer;
+                    font-weight: bold;
+                ">
+                    🎁 Get Bonus Gems (Thank You!)
+                </button>
+            </div>
+            
+            <button onclick="closeSupportModal()" style="
+                background: #666;
+                color: white;
+                border: none;
+                padding: 0.5rem 1rem;
+                border-radius: 8px;
+                cursor: pointer;
+            ">
+                Close
+            </button>
+        </div>
+    `;
+    
+    document.body.appendChild(supportModal);
+}
+
+function closeSupportModal() {
+    const modal = document.getElementById('supportModal');
+    if (modal) {
+        document.body.removeChild(modal);
+    }
+}
+
+function openMobileAppInfo() {
+    showAchievementBanner('📱 Mobile app with real ads coming soon! Check back for download links.');
+    closeSupportModal();
+}
+
+function grantBonusGems() {
+    state.gems += 25; // Bonus gems for supporting
+    updateStats();
+    saveState();
+    showAchievementBanner('🎁 Thank you for your support! +25 bonus gems!');
+    closeSupportModal();
+}
+
+// Real web ad integration (Google AdSense) - placeholder for future implementation
+function showRealWebAd(rewardType) {
+    // This would integrate with Google AdSense or another web ad network
+    // For now, fall back to simulation
+    console.log('Real web ads not yet configured - using simulation');
+    showBrowserRewardedAd(rewardType);
 }
 
 function getRewardDescription(rewardType) {
