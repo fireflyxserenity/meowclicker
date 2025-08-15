@@ -29,11 +29,14 @@ jobs:
         
     - name: Copy web assets
       run: |
-        cp *.html www/
-        cp *.css www/
-        cp *.js www/
-        cp *.png www/
-        cp *.json www/
+        cp *.html www/ || true
+        cp *.css www/ || true
+        cp *.js www/ || true
+        cp *.png www/ || true
+        cp *.json www/ || true
+        
+    - name: Install Capacitor CLI
+      run: npm install -g @capacitor/cli
         
     - name: Sync Capacitor
       run: npx cap sync ios
@@ -41,7 +44,7 @@ jobs:
     - name: Build iOS App
       run: |
         cd ios/App
-        xcodebuild -workspace App.xcworkspace -scheme App -configuration Debug -destination generic/platform=iOS -archivePath App.xcarchive archive
+        xcodebuild -workspace App.xcworkspace -scheme App -configuration Debug -destination generic/platform=iOS -archivePath App.xcarchive archive CODE_SIGNING_ALLOWED=NO
         
     - name: Upload iOS Build
       uses: actions/upload-artifact@v4

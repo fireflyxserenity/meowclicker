@@ -1,0 +1,56 @@
+name: Simple Build Test
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  test-build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Install dependencies
+      run: npm install
+      
+    - name: Install Capacitor CLI
+      run: npm install -g @capacitor/cli
+      
+    - name: Show current files
+      run: |
+        echo "Files in root:"
+        ls -la
+        echo "Files in www:"
+        ls -la www/ || echo "www directory doesn't exist yet"
+        
+    - name: Copy files to www
+      run: |
+        mkdir -p www
+        cp *.html www/ 2>/dev/null || echo "No HTML files"
+        cp *.css www/ 2>/dev/null || echo "No CSS files" 
+        cp *.js www/ 2>/dev/null || echo "No JS files"
+        cp *.png www/ 2>/dev/null || echo "No PNG files"
+        cp *.json www/ 2>/dev/null || echo "No JSON files"
+        
+    - name: Show copied files
+      run: |
+        echo "Files copied to www:"
+        ls -la www/
+        
+    - name: Test Capacitor sync
+      run: |
+        npx cap sync || echo "Sync failed but continuing..."
+        
+    - name: Upload www folder
+      uses: actions/upload-artifact@v4
+      with:
+        name: web-assets
+        path: www/

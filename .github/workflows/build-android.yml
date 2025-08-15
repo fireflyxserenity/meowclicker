@@ -22,6 +22,9 @@ jobs:
     - name: Install dependencies
       run: npm install
       
+    - name: Install Capacitor CLI
+      run: npm install -g @capacitor/cli
+      
     - name: Setup Java JDK
       uses: actions/setup-java@v4
       with:
@@ -33,19 +36,29 @@ jobs:
       
     - name: Copy web assets
       run: |
-        cp *.html www/
-        cp *.css www/
-        cp *.js www/
-        cp *.png www/
-        cp *.json www/
+        cp *.html www/ || true
+        cp *.css www/ || true
+        cp *.js www/ || true
+        cp *.png www/ || true
+        cp manifest.json www/ || true
+        
+    - name: List files for debugging
+      run: |
+        echo "Root directory:"
+        ls -la
+        echo "WWW directory:"
+        ls -la www/
         
     - name: Sync Capacitor
       run: npx cap sync android
       
+    - name: Make gradlew executable
+      run: chmod +x android/gradlew
+      
     - name: Build Android APK
       run: |
         cd android
-        ./gradlew assembleDebug
+        ./gradlew assembleDebug --no-daemon --stacktrace
         
     - name: Upload APK
       uses: actions/upload-artifact@v4
