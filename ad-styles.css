@@ -1,0 +1,286 @@
+/* Ad System Styling */
+.test-ad-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+}
+
+.test-ad-container {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border-radius: 20px;
+    padding: 2rem;
+    max-width: 500px;
+    width: 90%;
+    text-align: center;
+    border: 2px solid rgba(168, 85, 247, 0.3);
+    box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.5),
+        0 0 30px rgba(168, 85, 247, 0.2);
+}
+
+.test-ad-header h3 {
+    color: #fff;
+    margin-bottom: 0.5rem;
+    font-size: 1.5rem;
+}
+
+.test-ad-header p {
+    color: #ccc;
+    margin-bottom: 2rem;
+}
+
+.fake-video {
+    background: #000;
+    color: #fff;
+    padding: 4rem 2rem;
+    border-radius: 10px;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    border: 2px solid #333;
+}
+
+.ad-timer {
+    color: #ff6b6b;
+    font-weight: bold;
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+}
+
+.skip-ad-btn {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ff5252 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 150px;
+}
+
+.skip-ad-btn:disabled {
+    background: #666;
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.skip-ad-btn:not(:disabled):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+}
+
+/* Ad Button in Bonus Tab */
+.watch-ad-btn {
+    background: linear-gradient(135deg, #ff9500 0%, #ff6b35 100%);
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 12px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin: 1rem 0;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 
+        0 8px 25px rgba(255, 149, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.watch-ad-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.3), 
+        transparent);
+    transition: left 0.6s ease;
+}
+
+.watch-ad-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #ff6b35 0%, #ff9500 100%);
+    transform: translateY(-3px);
+    box-shadow: 
+        0 12px 35px rgba(255, 149, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.watch-ad-btn:hover:not(:disabled)::before {
+    left: 100%;
+}
+
+.watch-ad-btn:disabled {
+    background: #666;
+    cursor: not-allowed;
+    opacity: 0.5;
+    transform: none;
+    box-shadow: none;
+}
+
+.ad-status {
+    background: rgba(255, 149, 0, 0.1);
+    border: 1px solid rgba(255, 149, 0, 0.3);
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+    color: #ff9500;
+    text-align: center;
+}
+
+.ad-cooldown {
+    background: rgba(255, 107, 107, 0.1);
+    border: 1px solid rgba(255, 107, 107, 0.3);
+    color: #ff6b6b;
+}
+
+.ad-rewards {
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+.ad-rewards h4 {
+    color: #22c55e;
+    margin-bottom: 0.5rem;
+}
+
+.ad-rewards ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.ad-rewards li {
+    padding: 0.25rem 0;
+    color: #ddd;
+}
+
+.ad-rewards li::before {
+    content: '💰 ';
+    margin-right: 0.5rem;
+}
+
+/* Premium Ad Buttons */
+.premium-ad-rewards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.75rem;
+    margin: 1rem 0;
+}
+
+.premium-ad-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    color: white;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 
+        0 4px 15px rgba(102, 126, 234, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.premium-ad-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.2), 
+        transparent
+    );
+    transition: left 0.5s ease;
+}
+
+.premium-ad-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+        0 6px 20px rgba(102, 126, 234, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.premium-ad-btn:hover::before {
+    left: 100%;
+}
+
+.premium-ad-btn:active {
+    transform: translateY(0);
+}
+
+/* Special styling for different premium ad types */
+.premium-ad-btn:nth-child(1) {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+}
+
+.premium-ad-btn:nth-child(1):hover {
+    box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+}
+
+.premium-ad-btn:nth-child(2) {
+    background: linear-gradient(135deg, #feca57 0%, #ff9ff3 100%);
+    box-shadow: 0 4px 15px rgba(254, 202, 87, 0.3);
+}
+
+.premium-ad-btn:nth-child(2):hover {
+    box-shadow: 0 6px 20px rgba(254, 202, 87, 0.4);
+}
+
+.premium-ad-btn:nth-child(3) {
+    background: linear-gradient(135deg, #48dbfb 0%, #0abde3 100%);
+    box-shadow: 0 4px 15px rgba(72, 219, 251, 0.3);
+}
+
+.premium-ad-btn:nth-child(3):hover {
+    box-shadow: 0 6px 20px rgba(72, 219, 251, 0.4);
+}
+
+.premium-ad-btn:nth-child(4) {
+    background: linear-gradient(135deg, #ff9ff3 0%, #54a0ff 100%);
+    box-shadow: 0 4px 15px rgba(255, 159, 243, 0.3);
+    animation: megaGlow 2s ease-in-out infinite alternate;
+}
+
+.premium-ad-btn:nth-child(4):hover {
+    box-shadow: 0 6px 20px rgba(255, 159, 243, 0.4);
+}
+
+@keyframes megaGlow {
+    0% {
+        box-shadow: 
+            0 4px 15px rgba(255, 159, 243, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+    100% {
+        box-shadow: 
+            0 4px 25px rgba(255, 159, 243, 0.5),
+            0 0 30px rgba(255, 159, 243, 0.2),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    }
+}

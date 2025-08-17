@@ -1,0 +1,40 @@
+# PowerShell Commands to Copy Meow Clicker to Your Main Website
+# INCLUDING FIREBASE FOR CLOUD SAVES AND LEADERBOARDS
+# EXCLUDING DEVELOPMENT FILES (node_modules, package.json, etc.)
+
+# 1. Navigate to your main website folder (replace with your actual path)
+cd "C:\path\to\your\main\website\folder"
+
+# 2. Create game subdirectory
+mkdir meow-clicker
+cd meow-clicker
+
+# 3. Copy ONLY production files (7 files total - NO node_modules!)
+Copy-Item "C:\Users\melod\OneDrive\Desktop\MeowClickNew\index.html" -Destination "."
+Copy-Item "C:\Users\melod\OneDrive\Desktop\MeowClickNew\main.js" -Destination "."
+Copy-Item "C:\Users\melod\OneDrive\Desktop\MeowClickNew\style.css" -Destination "."
+Copy-Item "C:\Users\melod\OneDrive\Desktop\MeowClickNew\ad-styles.css" -Destination "."
+Copy-Item "C:\Users\melod\OneDrive\Desktop\MeowClickNew\ads.js" -Destination "."
+Copy-Item "C:\Users\melod\OneDrive\Desktop\MeowClickNew\firebase.js" -Destination "."
+Copy-Item "C:\Users\melod\OneDrive\Desktop\MeowClickNew\cat.png" -Destination "."
+
+# 4. Verify files copied correctly
+Get-ChildItem
+
+# Your game will be accessible at: yourwebsite.com/meow-clicker/
+# Firebase features: Cloud saves, Global leaderboards, Cross-device sync
+
+# FILES WE'RE SKIPPING (not needed for production):
+# ❌ node_modules/ - 50-200MB of development dependencies
+# ❌ package.json - npm configuration file
+# ❌ package-lock.json - npm lock file
+# ❌ .git/ - version control (your main site has its own)
+# ❌ debug/clean/enhanced versions - development files
+
+# WHAT WE'RE SKIPPING (you don't need these):
+# - firebase.js (cloud saves work without it via localStorage)
+# - All debug/clean/enhanced versions of files
+# - node_modules (not needed for production)
+# - package.json files (not needed for production)
+# - .git folder (your main site has its own git)
+# - AD_SETUP_GUIDE.md (just documentation)

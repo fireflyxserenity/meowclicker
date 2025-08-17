@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meow Clicker</title>
+    <link rel="stylesheet" href="style.css?v=2025081728">
+    <link rel="stylesheet" href="ad-styles.css?v=2025081729">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+            <h1 class="title">MEOW CLICKER</h1>
+        </div>
+        <div class="header-right">
+            <div class="button-group">
+                <button id="btn-bonus" class="header-btn" data-emoji="📺">📺 Bonus</button>
+                <button id="btn-lab" class="header-btn" data-emoji="🧪">🧪 Lab</button>
+                <button id="btn-goals" class="header-btn" data-emoji="🏆">🏆 Goals</button>
+                <button id="btn-prestige" class="header-btn" data-emoji="✨">✨ Prestige</button>
+                <button id="btn-profile" class="header-btn" data-emoji="👤">👤 Profile</button>
+                <button id="btn-ranks" class="header-btn" data-emoji="📊">📊 Ranks</button>
+            </div>
+        </div>
+    </header>
+
+    <section class="stats">
+        <div class="stat">
+            <span id="total-meows">0</span>
+            <div>Total Meows</div>
+        </div>
+        <div class="stat">
+            <span id="meows-per-sec">0</span>
+            <div>Meows/sec</div>
+        </div>
+        <div class="stat">
+            <span id="meows-per-click">1</span>
+            <div>Meows/click</div>
+        </div>
+        <div class="stat">
+            <span id="total-clicks">0</span>
+            <div>Total Clicks</div>
+        </div>
+    </section>
+
+    <section class="game">
+        <div class="cat-section">
+            <div class="cat-container">
+                <img id="cat" src="cat.png" alt="Click the cat!" class="cat">
+            </div>
+        </div>
+
+        <div class="upgrades-section">
+            <h2 class="section-title">Upgrades</h2>
+            <div class="upgrades-grid" id="upgrades-grid">
+                <!-- Upgrades will be generated here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Profile Modal -->
+    <div id="profileModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">👤 Player Profile</h2>
+                <button class="modal-close" id="closeProfile">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="profile-form">
+                    <label for="playerName">Player Name:</label>
+                    <input type="text" id="playerName" placeholder="Enter your name" maxlength="20">
+                    <button id="saveProfile" class="btn btn-primary">Save Profile</button>
+                    <button id="loadProfile" class="btn btn-secondary">Load Existing Profile</button>
+                </div>
+                <div id="profileStatus" class="profile-status"></div>
+                
+                <!-- All-Time Stats Section -->
+                <div id="allTimeStats" class="all-time-stats">
+                    <!-- All-time stats will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ranks Modal -->
+    <div id="ranksModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">📊 Global Leaderboard</h2>
+                <button class="modal-close" id="closeRanks">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="leaderboard-header">
+                    <h3>🏆 Top 100 Players Worldwide</h3>
+                    <button id="refreshRanks" class="btn btn-secondary">🔄 Refresh</button>
+                </div>
+                <div id="leaderboard" class="leaderboard">
+                    <div class="loading">Loading leaderboard...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase CDN -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <!-- Scripts -->
+    <!-- Firebase CDN (required for firebase.js to work) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-compat-database.js"></script>
+    
+    <!-- Game Scripts -->
+    <script src="firebase.js?v=2025081729"></script>
+    <script src="ads.js?v=2025081726"></script>
+    <script src="main.js?v=2025081727"></script>
+    
+    <script>
+        // Global game instance
+        let game;
+        
+        // Initialize game when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎮 Initializing Meow Clicker...');
+            
+            // Initialize Firebase first
+            if (typeof FirebaseManager !== 'undefined') {
+                window.firebaseManager = new FirebaseManager();
+                console.log('🔥 Firebase system initialized');
+            } else {
+                console.warn('⚠️ Firebase system not loaded');
+            }
+            
+            // Initialize ad system
+            if (typeof AdManager !== 'undefined') {
+                window.adManager = new AdManager();
+                console.log('📺 Ad system initialized');
+            } else {
+                console.warn('⚠️ Ad system not loaded');
+            }
+            
+            // Initialize game
+            game = new MeowClickerGame();
+            console.log('✅ Game initialized successfully!');
+        });
+        
+        // Handle page visibility for auto-save
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden && game) {
+                game.saveGameData();
+            }
+        });
+        
+        // Save before page unload
+        window.addEventListener('beforeunload', function() {
+            if (game) {
+                game.saveGameData();
+            }
+        });
+    </script>
+</body>
+</html>
