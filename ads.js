@@ -20,11 +20,11 @@ class AdManager {
     
     // Initialize Ad Networks
     initializeAds() {
-        // For Google AdSense
+        // For Google AdSense (banner ads only)
         this.initializeAdSense();
         
-        // For Unity Ads (alternative)
-        // this.initializeUnityAds();
+        // For AdInPlay (rewarded videos)
+        this.initializeAdInPlay();
     }
     
     // Google AdSense Integration
@@ -53,28 +53,40 @@ class AdManager {
         }
     }
     
-    // Unity Ads Integration (Alternative)
-    initializeUnityAds() {
-        // Unity Ads is good for games
-        // You need to:
-        // 1. Create Unity account
-        // 2. Create project
-        // 3. Enable Unity Ads
-        // 4. Get Game ID
+    // AdInPlay Integration (EXCELLENT for browser games)
+    initializeAdInPlay() {
+        // AdInPlay is specifically designed for browser games
+        // 1. Go to https://www.adinplay.com/
+        // 2. Sign up as publisher
+        // 3. Add your website and get Publisher ID
+        // 4. Replace 'YOUR_PUBLISHER_ID' with actual ID
         
-        const script = document.createElement('script');
-        script.src = 'https://unityads.unity3d.com/webgl/ads.js';
-        document.head.appendChild(script);
-        
-        script.onload = () => {
-            if (window.UnityAds) {
-                window.UnityAds.initialize('YOUR_UNITY_GAME_ID', {
-                    testMode: true, // Set to false for production
-                    enableLogging: true
+        if (typeof aiptag !== 'undefined') {
+            aiptag.cmd = aiptag.cmd || [];
+            aiptag.cmd.display = aiptag.cmd.display || [];
+            aiptag.cmd.player = aiptag.cmd.player || [];
+            
+            // Initialize with your publisher ID
+            aiptag.cmd.player.push(function() {
+                aiptag.adplayer = new aiptag.AdPlayer({
+                    AD_FULLSCREEN: true,
+                    AD_CENTERPLAYER: false,
+                    LOADING_TEXT: 'Loading ad...',
+                    PREROLL_ELEM: function(){return document.getElementById('preroll')},
+                    AIP_COMPLETE: () => {
+                        console.log('🎮 AdInPlay ad completed');
+                        this.adInPlayReady = true;
+                    },
+                    AIP_REMOVE: () => {
+                        console.log('🎮 AdInPlay ad removed');
+                    }
                 });
-                console.log('🎮 Unity Ads initialized');
-            }
-        };
+            });
+            
+            console.log('🎮 AdInPlay SDK loaded');
+        } else {
+            console.log('❌ AdInPlay SDK not loaded');
+        }
     }
     
     // Check if user can watch an ad
@@ -104,18 +116,13 @@ class AdManager {
         }
         
         try {
-            // Try AdSense first
-            if (this.adSenseReady) {
-                return await this.showAdSenseAd();
-            }
+            // AdInPlay integration pending approval - show coming soon message
+            return await this.showComingSoonAd();
             
-            // Try Unity Ads as backup
-            if (window.UnityAds) {
-                return await this.showUnityAd();
-            }
-            
-            // Fallback to test ad
-            return await this.showTestAd();
+            // Will be enabled once AdInPlay approves:
+            // if (this.adInPlayReady && typeof aiptag !== 'undefined') {
+            //     return await this.showAdInPlayAd();
+            // }
             
         } catch (error) {
             console.error('❌ Ad failed to show:', error);
@@ -157,20 +164,170 @@ class AdManager {
         });
     }
     
-    // Unity Ads Rewarded Ad
-    async showUnityAd() {
+    // AdInPlay Rewarded Ad (EXCELLENT REVENUE)
+    async showAdInPlayAd() {
         return new Promise((resolve, reject) => {
-            window.UnityAds.showAd('rewardedVideo', {
-                onComplete: () => {
-                    this.onAdComplete();
-                    resolve({ success: true, revenue: this.calculateRevenue() });
-                },
-                onError: (error) => {
-                    reject(new Error('Ad failed to load: ' + error));
-                },
-                onSkipped: () => {
-                    reject(new Error('Ad was skipped - no reward given'));
+            if (typeof aiptag === 'undefined' || !aiptag.adplayer) {
+                reject(new Error('AdInPlay SDK not loaded'));
+                return;
+            }
+            
+            // Show rewarded video ad
+            aiptag.cmd.player.push(function() {
+                aiptag.adplayer.startPreRoll({
+                    onComplete: () => {
+                        console.log('🎮 AdInPlay Ad completed - REWARD GIVEN!');
+                        this.onAdComplete();
+                        resolve({ success: true, revenue: this.calculateRevenue() });
+                    },
+                    onSkip: () => {
+                        console.log('⏭️ AdInPlay Ad skipped');
+                        reject(new Error('Ad was skipped - no reward given'));
+                    },
+                    onError: (error) => {
+                        console.error('❌ AdInPlay Ad error:', error);
+                        reject(new Error('Ad failed to load: ' + error));
+                    }
+                });
+            });
+        });
+    }
+
+    // Coming Soon Ad (while waiting for AdInPlay approval)
+    async showComingSoonAd() {
+        return new Promise((resolve) => {
+            // Create coming soon overlay
+            const adOverlay = document.createElement('div');
+            adOverlay.className = 'coming-soon-ad-overlay';
+            adOverlay.innerHTML = `
+                <div class="coming-soon-ad-container">
+                    <div class="coming-soon-header">
+                        <h3>🚀 Ad Rewards Coming Soon!</h3>
+                        <p>We're setting up real video ads for awesome rewards</p>
+                    </div>
+                    <div class="coming-soon-content">
+                        <div class="coming-soon-icon">📺</div>
+                        <div class="coming-soon-text">
+                            <h4>What's Coming:</h4>
+                            <ul>
+                                <li>🎬 Watch video ads</li>
+                                <li>💰 Earn bonus meows</li>
+                                <li>⚡ Get click multipliers</li>
+                                <li>🎁 Unlock special rewards</li>
+                            </ul>
+                        </div>
+                        <div class="coming-soon-eta">
+                            <strong>Expected: Soon™</strong>
+                        </div>
+                    </div>
+                    <button id="coming-soon-ok" class="coming-soon-btn">Got it! 😸</button>
+                </div>
+            `;
+            
+            // Add styles
+            const styles = `
+                .coming-soon-ad-overlay {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0.9);
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 10000;
+                    animation: fadeIn 0.3s ease;
                 }
+                
+                .coming-soon-ad-container {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    padding: 30px;
+                    border-radius: 20px;
+                    text-align: center;
+                    max-width: 400px;
+                    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+                    color: white;
+                }
+                
+                .coming-soon-header h3 {
+                    margin: 0 0 10px 0;
+                    font-size: 24px;
+                }
+                
+                .coming-soon-header p {
+                    margin: 0 0 20px 0;
+                    opacity: 0.9;
+                }
+                
+                .coming-soon-icon {
+                    font-size: 60px;
+                    margin: 20px 0;
+                }
+                
+                .coming-soon-text {
+                    text-align: left;
+                    margin: 20px 0;
+                }
+                
+                .coming-soon-text ul {
+                    list-style: none;
+                    padding: 0;
+                }
+                
+                .coming-soon-text li {
+                    padding: 5px 0;
+                    font-size: 14px;
+                }
+                
+                .coming-soon-eta {
+                    margin: 20px 0;
+                    padding: 15px;
+                    background: rgba(255,255,255,0.1);
+                    border-radius: 10px;
+                }
+                
+                .coming-soon-btn {
+                    background: #ff6b6b;
+                    color: white;
+                    border: none;
+                    padding: 12px 30px;
+                    border-radius: 25px;
+                    font-size: 16px;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                }
+                
+                .coming-soon-btn:hover {
+                    background: #ff5252;
+                    transform: translateY(-2px);
+                }
+                
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: scale(0.9); }
+                    to { opacity: 1; transform: scale(1); }
+                }
+            `;
+            
+            // Add styles to page
+            const styleSheet = document.createElement('style');
+            styleSheet.textContent = styles;
+            document.head.appendChild(styleSheet);
+            
+            document.body.appendChild(adOverlay);
+            
+            // Handle close button
+            document.getElementById('coming-soon-ok').addEventListener('click', () => {
+                document.body.removeChild(adOverlay);
+                document.head.removeChild(styleSheet);
+                
+                // Give a small consolation reward for their patience
+                console.log('🎁 Thanks for your patience! Here\'s a small bonus.');
+                resolve({ 
+                    success: true, 
+                    revenue: 0.1, // Small bonus
+                    message: "Thanks for your patience! Small bonus awarded! 😸"
+                });
             });
         });
     }
