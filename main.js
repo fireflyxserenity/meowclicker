@@ -181,14 +181,59 @@ class MeowClickerGame {
         }, 1000);
     }
     
+    addButtonTouchEvents(buttonId) {
+        const button = document.getElementById(buttonId);
+        if (button) {
+            button.addEventListener('touchstart', (e) => {
+                button.classList.add('touching');
+            });
+            
+            button.addEventListener('touchend', (e) => {
+                button.classList.remove('touching');
+            });
+            
+            button.addEventListener('touchcancel', (e) => {
+                button.classList.remove('touching');
+            });
+        }
+    }
+    
     setupEventListeners() {
         // Cat clicking
         const cat = document.getElementById('cat');
         if (cat) {
             cat.addEventListener('click', (e) => this.clickCat(e));
+            
+            // Touch events for mobile feedback
+            cat.addEventListener('touchstart', (e) => {
+                e.preventDefault(); // Prevent default touch behavior
+                cat.classList.add('touching');
+            });
+            
+            cat.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                cat.classList.remove('touching');
+                this.clickCat(e);
+            });
+            
+            cat.addEventListener('touchcancel', (e) => {
+                cat.classList.remove('touching');
+            });
+            
+            // Prevent context menu and image saving
+            cat.addEventListener('contextmenu', (e) => e.preventDefault());
+            cat.addEventListener('dragstart', (e) => e.preventDefault());
+            cat.addEventListener('selectstart', (e) => e.preventDefault());
         }
         
         // Header buttons
+        this.addButtonTouchEvents('btn-bonus');
+        this.addButtonTouchEvents('btn-lab');
+        this.addButtonTouchEvents('btn-goals');
+        this.addButtonTouchEvents('btn-prestige');
+        this.addButtonTouchEvents('btn-profile');
+        this.addButtonTouchEvents('btn-ranks');
+        
         document.getElementById('btn-bonus')?.addEventListener('click', () => {
             this.notifications.bonus = false;
             this.showBonusModal();
@@ -345,8 +390,8 @@ class MeowClickerGame {
         upgrade.cost = Math.floor(upgrade.baseCost * Math.pow(1.15, upgrade.owned));
         
         this.checkAchievements();
-        this.updateDisplay();
         this.renderUpgrades();
+        this.updateDisplay(); // Call updateDisplay after renderUpgrades to ensure affordable class is applied
         
         // Auto-save if player is logged in
         if (this.gameState.playerName) {
@@ -949,8 +994,8 @@ class MeowClickerGame {
         
         this.checkAchievements();
         this.saveGameData();
-        this.updateDisplay();
         this.renderUpgrades();
+        this.updateDisplay(); // Call updateDisplay after renderUpgrades to ensure affordable class is applied
         this.hideModal('prestigeModal');
         this.showNotification(`Prestige completed! Gained ${prestigePointsGain} prestige points!`);
     }
@@ -1202,7 +1247,21 @@ class MeowClickerGame {
         this.upgrades.forEach(upgrade => {
             const upgradeElement = document.createElement('div');
             upgradeElement.className = `upgrade ${this.gameState.totalMeows >= upgrade.cost ? 'affordable' : ''}`;
+            upgradeElement.setAttribute('data-upgrade-id', upgrade.id);
             upgradeElement.onclick = () => this.buyUpgrade(upgrade.id);
+            
+            // Add touch events for mobile feedback
+            upgradeElement.addEventListener('touchstart', (e) => {
+                upgradeElement.classList.add('touching');
+            });
+            
+            upgradeElement.addEventListener('touchend', (e) => {
+                upgradeElement.classList.remove('touching');
+            });
+            
+            upgradeElement.addEventListener('touchcancel', (e) => {
+                upgradeElement.classList.remove('touching');
+            });
             
             upgradeElement.innerHTML = `
                 <div class="upgrade-header">
@@ -1240,12 +1299,23 @@ class MeowClickerGame {
         
         // Update upgrade affordability
         this.upgrades.forEach(upgrade => {
-            const upgradeElement = document.querySelector(`[onclick*="${upgrade.id}"]`);
+            const upgradeElement = document.querySelector(`[data-upgrade-id="${upgrade.id}"]`);
             if (upgradeElement) {
                 if (this.gameState.totalMeows >= upgrade.cost) {
                     upgradeElement.classList.add('affordable');
                 } else {
                     upgradeElement.classList.remove('affordable');
+                }
+                
+                // Also update the cost display in case the cost has changed
+                const costElement = upgradeElement.querySelector('.upgrade-cost');
+                if (costElement) {
+                    costElement.textContent = `Cost: ${this.formatNumber(upgrade.cost)}`;
+                }
+                
+                const ownedElement = upgradeElement.querySelector('.upgrade-owned');
+                if (ownedElement) {
+                    ownedElement.textContent = `Owned: ${upgrade.owned}`;
                 }
             }
         });
